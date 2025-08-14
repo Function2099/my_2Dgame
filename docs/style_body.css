@@ -100,15 +100,25 @@ header, footer {
   justify-content: center;
   padding: 0;
   margin: 0;
+  list-style: none;
+  gap: 10px;
 }
 
 .tab-content li {
     display: inline-block;
     padding: 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
 }
 
 .tab-content li:hover{
     background-color: #656565;
+}
+
+.tab-content li.active {
+  background-color: #353535;
+  color: white;
+  font-weight: bold;
 }
 
 .tab-content li a {

@@ -18,7 +18,7 @@ document.getElementById("close-login").addEventListener("click", () => {
 function showTab(tabNumber) {
   const info = document.getElementById("game-info");
   const controls = document.getElementById("game-controls");
-
+  // 顯示對應內容
   if (tabNumber === 1) {
     info.style.display = "block";
     controls.style.display = "none";
@@ -26,4 +26,11 @@ function showTab(tabNumber) {
     info.style.display = "none";
     controls.style.display = "block";
   }
+
+    // 切換 active 樣式
+  const tabs = document.querySelectorAll(".tab-content li");
+  tabs.forEach((tab, index) => {
+    tab.classList.toggle("active", index === tabNumber - 1);
+  });
+
 }
