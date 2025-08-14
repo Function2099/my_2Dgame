@@ -1,0 +1,20 @@
+#auth-panel {
+  align-self: flex-end;
+  margin: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+#auth-panel button {
+  padding: 8px 12px;
+  background-color: #ffffff;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#auth-panel button:hover {
+  background-color: #bebebe;
+}

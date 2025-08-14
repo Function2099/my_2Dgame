@@ -1,0 +1,145 @@
+/* 主體美化 */
+body {
+  margin: 0;
+  background-color: #0a0a1a;
+  color: #fff;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header, footer {
+  text-align: center;
+  padding: 20px;
+}
+
+.logo{
+  width: 40px;
+  height: auto;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 上方導覽相關 */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1a1a2e;
+  padding: 10px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: block;
+  margin-right: 20px;        
+  object-fit: contain;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-list li{
+    display: flex;
+    align-items: center;
+    height: 70px;
+}
+
+.nav-list li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1em;
+  line-height: 70px;
+  transition: color 0.3s;
+}
+
+.nav-list li a:hover {
+  color: #00f0ff;
+}
+
+/* 遊戲視窗相關 */
+#game-section {
+  max-width: 1280px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+#game-frame {
+  width: 1280px;
+  height: 720px;
+  border: 2px solid #fff;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.placeholder {
+  color: #888;
+  font-size: 1.2em;
+}
+
+/* 下方導覽介紹頁面 */
+.tab-content{
+    list-style-type: none;
+}
+
+.tab-content ul {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-content li {
+    display: inline-block;
+    padding: 20px;
+}
+
+.tab-content li:hover{
+    background-color: #656565;
+}
+
+.tab-content li a {
+    color: white;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* 方框內介紹 */
+.tab-panel {
+  width: 600px;         /* 固定寬度 */
+  height: 400px;        /* 固定高度 */
+  border: 2px solid #ccc; /* 邊框 */
+  padding: 16px;        /* 內距 */
+  overflow-y: auto;     /* 超出時可捲動 */
+  box-sizing: border-box; /* 包含 padding 和 border */
+  margin-top: 4px;     /* 與上方區塊間距 */
+}
+
+.tab-panel p {
+  margin: 0;
+}
+
+@media screen and (max-width: 480px) {
+    body {
+    background-color: lightblue;
+  }
+
+  .tab-panel {
+    width: 90%;         /* 改為百分比寬度 */
+    height: auto;       /* 高度自動，避免內容被擠壓 */
+    padding: 12px;
+  }
+}
