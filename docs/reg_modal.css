@@ -13,6 +13,7 @@
 }
 
 .modal-content {
+  position: relative;
   background-color: #1a1a2e;
   padding: 30px;
   border-radius: 10px;
@@ -44,6 +45,36 @@
 
 .hidden {
   display: none;
+}
+
+.login-switch {
+  position: absolute;
+  bottom: 25px;
+  right: 20px;
+}
+
+#switch-to-register {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.register-switch {
+  position: absolute;
+  bottom: 25px;
+  right: 20px;
+}
+
+#switch-to-login {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 /* 錯誤訊息美化 */

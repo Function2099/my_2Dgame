@@ -7,6 +7,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1; /* 讓主要內容區域擴展填充空間 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 header, footer {
@@ -74,8 +82,8 @@ header, footer {
 }
 
 #game-frame {
-  width: 1280px;
-  height: 720px;
+  width: 800px;
+  height: 600px;
   border: 2px solid #fff;
   background-color: #000;
   display: flex;
@@ -83,11 +91,88 @@ header, footer {
   align-items: center;
   margin: 20px auto;
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+#game-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .placeholder {
   color: #888;
   font-size: 1.2em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#game-launcher {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+#start-button {
+  padding: 12px 24px;
+  font-size: 18px;
+  background-color: #00f0ff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#start-button:hover {
+  background-color: #00c0cc; /* 懸停時變深一點 */
+}
+
+#start-button:active {
+  background-color: #0099aa; /* 按下時再深一點 */
+}
+
+#start-button:disabled {
+  background-color: #555;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 當遊戲啟動時隱藏佔位符 */
+#game-frame canvas ~ .placeholder {
+  display: none;
+}
+
+/* 遊戲狀態提示 */
+.game-status {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 100;
+  display: none;
+}
+
+.game-status.active {
+  display: block;
 }
 
 /* 下方導覽介紹頁面 */
@@ -148,8 +233,13 @@ header, footer {
   }
 
   .tab-panel {
-    width: 90%;         /* 改為百分比寬度 */
-    height: auto;       /* 高度自動，避免內容被擠壓 */
+    width: 90%;
+    height: auto;
     padding: 12px;
+  }
+  
+  #game-frame {
+    width: 100%;
+    height: 400px;
   }
 }

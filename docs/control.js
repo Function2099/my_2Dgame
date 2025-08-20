@@ -2,6 +2,19 @@
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let currentUser = null;
 
+function tryStartGame() {
+  if (!currentUser) {
+    alert('登入後開始遊戲');
+    return;
+  }
+
+  if (typeof window.startGame === 'function') {
+    window.startGame();
+  } else {
+    console.error('startGame 函數未定義');
+  }
+}
+
 // 註冊功能
 document.getElementById('register-form').addEventListener('submit', (e) => {
   e.preventDefault(); // 阻止表單默認提交行為
@@ -40,6 +53,15 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
   localStorage.setItem('currentUser', email); //保存當前用戶到localStorage
   updateAuthUI();
 
+  console.log('註冊成功，準備啟動遊戲...');
+  console.log('game-frame 元素:', document.getElementById('game-frame'));
+  console.log('startGame 函數:', typeof window.startGame);
+
+  setTimeout(() => {
+    console.log('調用 tryStartGame');
+    tryStartGame();
+  }, 500);
+
   document.getElementById("register-email").value = "";
   document.getElementById("register-username").value = "";
   document.getElementById("register-password").value = "";
@@ -76,6 +98,13 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
       alert(`歡迎回來，${users[userEmail].nickname || users[userEmail].username}！`);
       document.getElementById('login-modal').classList.add('hidden');
       updateAuthUI();
+
+      console.log('登入成功，準備啟動遊戲...');
+      setTimeout(() => {
+        console.log('調用 tryStartGame');
+        tryStartGame();
+      }, 500);
+
     } else {
       showLoginError('密碼錯誤！');
     }
@@ -111,15 +140,14 @@ function updateAuthUI() {
   authPanel.innerHTML = currentUser
     ? `<button id="logout">登出 (${users[currentUser].nickname || users[currentUser].username})</button>`
     : `<button id="show-register">註冊</button>
-           <button id="show-login">登入</button>`;
+       <button id="show-login">登入</button>`;
 
-  // 重新綁定事件（按鈕是動態生成的）
+  // 重新綁定事件
   if (currentUser) {
     document.getElementById('logout').addEventListener('click', logout);
   } else {
     document.getElementById('show-register').addEventListener('click', () => {
       document.getElementById('register-modal').classList.remove('hidden');
-      // 確保每次點擊註冊時，欄位為空
       document.getElementById("register-email").value = "";
       document.getElementById("register-username").value = "";
       document.getElementById("register-password").value = "";
@@ -127,15 +155,20 @@ function updateAuthUI() {
     });
     document.getElementById('show-login').addEventListener('click', () => {
       document.getElementById('login-modal').classList.remove('hidden');
-      // 確保每次點擊登入時，欄位為空
       document.getElementById("login-identifier").value = "";
       document.getElementById("login-password").value = "";
     });
+
+  }
+  const gameLauncher = document.getElementById("game-launcher");
+  if (gameLauncher) {
+    gameLauncher.classList.toggle("hidden", !!currentUser);
   }
 }
 
 // 登出函數
 function logout() {
+  document.getElementById('game-frame').innerHTML = '<div class="placeholder"><p>這裡將嵌入遊戲畫面</p></div>';
   currentUser = null;
   localStorage.removeItem('currentUser')
   updateAuthUI();
@@ -180,3 +213,61 @@ function showTab(tabNumber) {
     tab.classList.toggle("active", index === tabNumber - 1);
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const placeholder = document.querySelector('#game-frame .placeholder');
+  if (placeholder) {
+    placeholder.remove();
+  }
+
+  // 不自動啟動遊戲，等登入後再啟動
+});
+
+// 中間登入按鈕
+document.getElementById('start-button').addEventListener('click', () => {
+  if (!currentUser) {
+    alert('請先登入才能開始遊戲');
+    document.getElementById('login-modal').classList.remove('hidden');
+    document.getElementById("login-identifier").value = "";
+    document.getElementById("login-password").value = "";
+    return;
+  }
+
+  const startBtn = document.getElementById('start-button');
+  if (startBtn) {
+    startBtn.disabled = !currentUser; // 登入後啟用，未登入禁用
+  }
+
+  // 隱藏啟動按鈕
+  document.getElementById('game-launcher').style.display = 'none';
+
+  // 啟動遊戲
+  window.startGame();
+});
+
+document.getElementById('switch-to-register').addEventListener('click', () => {
+  // 關閉登入彈窗
+  document.getElementById('login-modal').classList.add('hidden');
+
+  // 清空註冊欄位
+  document.getElementById("register-email").value = "";
+  document.getElementById("register-username").value = "";
+  document.getElementById("register-password").value = "";
+  document.getElementById("register-nickname").value = "";
+
+  // 顯示註冊彈窗
+  document.getElementById('register-modal').classList.remove('hidden');
+});
+
+document.getElementById('switch-to-login').addEventListener('click', () => {
+  // 關閉註冊彈窗
+  document.getElementById('register-modal').classList.add('hidden');
+
+  // 清空登入欄位
+  document.getElementById("login-identifier").value = "";
+  document.getElementById("login-password").value = "";
+
+  // 顯示登入彈窗
+  document.getElementById('login-modal').classList.remove('hidden');
+});
