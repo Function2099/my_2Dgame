@@ -34,6 +34,16 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
   localStorage.setItem('users', JSON.stringify(users));
   alert('註冊成功！');
   document.getElementById('register-modal').classList.add('hidden'); // 關閉彈窗
+
+  // 自動登入
+  currentUser = email; //設置當前用戶剛註冊的郵箱
+  localStorage.setItem('currentUser', email); //保存當前用戶到localStorage
+  updateAuthUI();
+
+  document.getElementById("register-email").value = "";
+  document.getElementById("register-username").value = "";
+  document.getElementById("register-password").value = "";
+  document.getElementById("register-nickname").value = "";
 });
 
 
@@ -43,9 +53,9 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
   const identifier = document.getElementById('login-identifier').value;
   const password = document.getElementById('login-password').value;
-  
+
   // 檢查是否空輸入
-  if (!identifier || !password){
+  if (!identifier || !password) {
     showLoginError('請輸入帳號或密碼');
     return;
   }
@@ -72,9 +82,9 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
   } else {
     showLoginError('帳號不存在！');
   }
-  });
+});
 
-function showLoginError(message){
+function showLoginError(message) {
   //移除舊的錯誤訊息
   const oldError = document.querySelector('.login-error-message');
   if (oldError) oldError.remove();
