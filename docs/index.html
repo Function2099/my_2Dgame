@@ -1,111 +1,111 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2D橫向遊戲</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <link rel="stylesheet" href="style_body.css" />
+    <link rel="stylesheet" href="./reg_button.css" />
+    <link rel="stylesheet" href="./reg_modal.css" />
+    <script src="control.js" defer></script>
+    <script type="module" src="./game.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2D橫向遊戲</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-  <link rel="stylesheet" href="style_body.css" />
-  <link rel="stylesheet" href="./reg_button.css" />
-  <link rel="stylesheet" href="./reg_modal.css" />
-  <script src="control.js" defer></script>
-  <script src="game.js" defer></script>
-</head>
+  <body>
+    <!-- 註冊登入相關按鈕 -->
+    <div id="auth-panel">
+      <button id="show-register">註冊</button>
+      <button id="show-login">登入</button>
+    </div>
+    <!-- 註冊彈窗 -->
+    <div id="register-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>帳號註冊</h2>
+        <form id="register-form">
+          <label for="register-username">郵箱帳號</label>
+          <input type="text" id="register-email" required />
 
-<body>
-  <!-- 註冊登入相關按鈕 -->
-  <div id="auth-panel">
-    <button id="show-register">註冊</button>
-    <button id="show-login">登入</button>
-  </div>
-  <!-- 註冊彈窗 -->
-  <div id="register-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>帳號註冊</h2>
-      <form id="register-form">
-        <label for="register-username">郵箱帳號</label>
-        <input type="text" id="register-email" required />
+          <label for="register-username">使用者名稱</label>
+          <input type="text" id="register-username" required />
 
-        <label for="register-username">使用者名稱</label>
-        <input type="text" id="register-username" required />
+          <label for="register-password">密碼</label>
+          <input type="password" id="register-password" required />
 
-        <label for="register-password">密碼</label>
-        <input type="password" id="register-password" required />
+          <label for="register-nickname">暱稱</label>
+          <input type="text" id="register-nickname" />
 
-        <label for="register-nickname">暱稱</label>
-        <input type="text" id="register-nickname" />
+          <button type="submit">註冊</button>
+          <button type="button" id="close-register">取消</button>
+        </form>
 
-        <button type="submit">註冊</button>
-        <button type="button" id="close-register">取消</button>
-      </form>
-
-      <div class="register-switch">
-        <button type="button" id="switch-to-login">已經有帳號？登入</button>
+        <div class="register-switch">
+          <button type="button" id="switch-to-login">已經有帳號？登入</button>
+        </div>
       </div>
     </div>
-  </div>
-  <!-- 登入彈窗 -->
-  <div id="login-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>帳號登入</h2>
-      <form id="login-form">
-        <label for="login-identifier">帳號(電子郵件或使用者名稱)</label>
-        <input type="text" id="login-identifier" required />
+    <!-- 登入彈窗 -->
+    <div id="login-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>帳號登入</h2>
+        <form id="login-form">
+          <label for="login-identifier">帳號(電子郵件或使用者名稱)</label>
+          <input type="text" id="login-identifier" required />
 
-        <label for="login-password">密碼</label>
-        <input type="password" id="login-password" required />
+          <label for="login-password">密碼</label>
+          <input type="password" id="login-password" required />
 
-        <button type="submit">登入</button>
-        <button type="button" id="close-login">取消</button>
-      </form>
-      <div class="login-switch">
-        <button type="button" id="switch-to-register">還沒有帳號？註冊</button>
+          <button type="submit">登入</button>
+          <button type="button" id="close-login">取消</button>
+        </form>
+        <div class="login-switch">
+          <button type="button" id="switch-to-register">
+            還沒有帳號？註冊
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-  <!-- 跳轉超連結 -->
-  <header>
-    <h1>welcome my game</h1>
-    <nav class="navbar">
-      <img src="logo.png" alt="Logo" class="logo" />
-      <ul class="nav-list">
-        <li><a href="#game-section">首頁</a></li>
-        <li><a href="#game-info" onclick="showTab(1)">遊戲介紹</a></li>
-        <li><a href="#game-controls" onclick="showTab(2)">操作方式</a></li>
+    <!-- 跳轉超連結 -->
+    <header>
+      <h1>welcome my game</h1>
+      <nav class="navbar">
+        <img src="logo.png" alt="Logo" class="logo" />
+        <ul class="nav-list">
+          <li><a href="#game-section">首頁</a></li>
+          <li><a href="#game-info" onclick="showTab(1)">遊戲介紹</a></li>
+          <li><a href="#game-controls" onclick="showTab(2)">操作方式</a></li>
+        </ul>
+      </nav>
+    </header>
+    <!-- 主要操控區 -->
+    <main>
+      <section id="game-section">
+        <h2>遊戲畫面</h2>
+        <div id="game-frame">
+          <div id="game-launcher">
+            <button id="start-button">登入後開始遊戲</button>
+          </div>
+          <div class="placeholder">
+            <p>這裡將嵌入遊戲畫面</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="tab-content">
+      <ul>
+        <li onclick="showTab(1)">遊戲介紹</li>
+        <li onclick="showTab(2)">操作方式</li>
       </ul>
-    </nav>
-  </header>
-  <!-- 主要操控區 -->
-  <main>
-    <section id="game-section">
-      <h2>遊戲畫面</h2>
-      <div id="game-frame">
-        <div id="game-launcher">
-          <button id="start-button">登入後開始遊戲</button>
-        </div>
-        <div class="placeholder">
-          <p>這裡將嵌入遊戲畫面</p>
-        </div>
-      </div>
+    </div>
+    <section id="game-info" class="tab-panel">
+      <p>喵喵喵，目前測試<br />不對阿</p>
     </section>
-  </main>
-  <div class="tab-content">
-    <ul>
-      <li onclick="showTab(1)">遊戲介紹</li>
-      <li onclick="showTab(2)">操作方式</li>
-    </ul>
-  </div>
-  <section id="game-info" class="tab-panel">
-    <p>喵喵喵，目前測試<br />不對阿</p>
-  </section>
-  <section id="game-controls" class="tab-panel" style="display: none">
-    <p>旺旺旺</p>
-  </section>
-  <!-- 作者相關 -->
-  <footer>
-    <p>© 2025 趙宇玄製作</p>
-  </footer>
-</body>
-
+    <section id="game-controls" class="tab-panel" style="display: none">
+      <p>旺旺旺</p>
+    </section>
+    <!-- 作者相關 -->
+    <footer>
+      <p>© 2025 趙宇玄製作</p>
+    </footer>
+  </body>
 </html>

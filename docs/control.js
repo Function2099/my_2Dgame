@@ -2,16 +2,10 @@
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let currentUser = null;
 
-function tryStartGame() {
+function startGame() {
   if (!currentUser) {
     alert('登入後開始遊戲');
     return;
-  }
-
-  if (typeof window.startGame === 'function') {
-    window.startGame();
-  } else {
-    console.error('startGame 函數未定義');
   }
 }
 
@@ -58,8 +52,8 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
   console.log('startGame 函數:', typeof window.startGame);
 
   setTimeout(() => {
-    console.log('調用 tryStartGame');
-    tryStartGame();
+    console.log('調用 startGame');
+    startGame();
   }, 500);
 
   document.getElementById("register-email").value = "";
@@ -101,8 +95,8 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
       console.log('登入成功，準備啟動遊戲...');
       setTimeout(() => {
-        console.log('調用 tryStartGame');
-        tryStartGame();
+        console.log('調用 startGame');
+        startGame();
       }, 500);
 
     } else {
