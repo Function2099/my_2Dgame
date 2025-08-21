@@ -2,11 +2,12 @@
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let currentUser = null;
 
-function startGame() {
+function checkLoginBeforeStart() {
   if (!currentUser) {
     alert('登入後開始遊戲');
     return;
   }
+  window.startGame(); // 呼叫 game.js 的版本
 }
 
 // 註冊功能
@@ -53,7 +54,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
 
   setTimeout(() => {
     console.log('調用 startGame');
-    startGame();
+    checkLoginBeforeStart();
   }, 500);
 
   document.getElementById("register-email").value = "";
@@ -96,7 +97,7 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
       console.log('登入成功，準備啟動遊戲...');
       setTimeout(() => {
         console.log('調用 startGame');
-        startGame();
+        checkLoginBeforeStart();
       }, 500);
 
     } else {

@@ -1,4 +1,6 @@
 // game.js - 
+import { SettingsScene } from '../scenes/SettingScene.js';
+import { MainMenuScene } from '../scenes/MainMenuScene.js';
 import { GameScene } from '../scenes/GameScene.js';
 
 // 遊戲變數
@@ -7,17 +9,26 @@ let game = null;
 // 遊戲配置
 const gameConfig = {
     type: Phaser.AUTO,
-    width: document.getElementById('game-frame').clientWidth,
-    height: document.getElementById('game-frame').clientHeight,
     parent: 'game-frame',
+    backgroundColor: '#000000',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 800,
+        height: 600
+    },
     physics: {
         default: 'arcade',
         arcade: {
             gravity: { y: 800 },
-            debug: true // 設為 true 可調試碰撞框
+            debug: true
         }
     },
-    scene: [GameScene]
+    scene: [
+        MainMenuScene,
+        SettingsScene,
+        GameScene
+    ]
 };
 
 // 啟動遊戲函數（從 control.js 調用）
@@ -34,5 +45,4 @@ function startGame() {
         console.log('遊戲已經啟動');
     }
 }
-
 window.startGame = startGame;
