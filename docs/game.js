@@ -46,3 +46,7 @@ function startGame() {
     }
 }
 window.startGame = startGame;
+
+window.addEventListener('DOMContentLoaded', () => {
+    startGame();
+});
