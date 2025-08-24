@@ -1,7 +1,7 @@
 // game.js - 
-import { SettingsScene } from '../scenes/SettingScene.js';
-import { MainMenuScene } from '../scenes/MainMenuScene.js';
-import { GameScene } from '../scenes/GameScene.js';
+import { SettingsScene } from '../src/scenes/SettingScene.js';
+import { MainMenuScene } from '../src/scenes/MainMenuScene.js';
+import { GameScene } from '../src/scenes/GameScene.js';
 
 // 遊戲變數
 let game = null;
