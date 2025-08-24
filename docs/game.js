@@ -70,7 +70,7 @@ function destroyGame() {
 window.startGame = startGame;
 window.destroyGame = destroyGame;
 
-// 用在test_game.html用的，用index.html時記得註解
+// 用在test_game.html用的，用index.html時記得註解掉這段
 // window.addEventListener('DOMContentLoaded', () => {
 //     startGame();
 // });

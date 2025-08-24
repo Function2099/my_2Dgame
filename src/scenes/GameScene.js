@@ -62,7 +62,7 @@ export class GameScene extends Phaser.Scene {
         this.isGameActive = true;
     }
 
-    // 測試更新
+    // 介面刷新相關(遊戲幀)
     update() {
         if (!this.isGameActive) return;
         this.playerController.update();
