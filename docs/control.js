@@ -7,7 +7,8 @@ function checkLoginBeforeStart() {
     alert('登入後開始遊戲');
     return;
   }
-  window.startGame(); // 呼叫 game.js 的版本
+  // 呼叫 game.js 的版本
+  window.startGame();
 }
 
 // 註冊功能
@@ -137,9 +138,14 @@ function updateAuthUI() {
     : `<button id="show-register">註冊</button>
        <button id="show-login">登入</button>`;
 
+  bindStartButton();
   // 重新綁定事件
   if (currentUser) {
-    document.getElementById('logout').addEventListener('click', logout);
+    const logoutBtn = document.getElementById('logout');
+    logoutBtn.replaceWith(logoutBtn.cloneNode(true)); // 移除所有事件
+    const newLogoutBtn = document.getElementById('logout');
+    newLogoutBtn.addEventListener('click', logout);
+
   } else {
     document.getElementById('show-register').addEventListener('click', () => {
       document.getElementById('register-modal').classList.remove('hidden');
@@ -163,9 +169,16 @@ function updateAuthUI() {
 
 // 登出函數
 function logout() {
-  document.getElementById('game-frame').innerHTML = '<div class="placeholder"><p>這裡將嵌入遊戲畫面</p></div>';
+  // 清空遊戲畫面，恢復 placeholder
+  document.getElementById('game-frame').innerHTML = `
+    <div id="game-launcher">
+      <button id="start-button">登入後開始遊戲</button>
+    </div>
+    <div class="placeholder"><p>這裡將嵌入遊戲畫面</p></div>
+  `;
   currentUser = null;
-  localStorage.removeItem('currentUser')
+  localStorage.removeItem('currentUser');
+  destroyGame();
   updateAuthUI();
   alert('已登出！');
 }
@@ -216,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     placeholder.remove();
   }
 
-  // 不自動啟動遊戲，等登入後再啟動
+  bindStartButton();
 });
 
 // 中間登入按鈕
@@ -266,3 +279,28 @@ document.getElementById('switch-to-login').addEventListener('click', () => {
   // 顯示登入彈窗
   document.getElementById('login-modal').classList.remove('hidden');
 });
+
+// 重新綁定按鈕
+function bindStartButton() {
+  console.log('重新綁定 start-button');
+
+  const oldBtn = document.getElementById('start-button');
+  if (!oldBtn) return;
+
+  const newBtn = oldBtn.cloneNode(true);
+  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
+  newBtn.addEventListener('click', () => {
+    if (!currentUser) {
+      alert('請先登入才能開始遊戲');
+      document.getElementById('login-modal').classList.remove('hidden');
+      document.getElementById("login-identifier").value = "";
+      document.getElementById("login-password").value = "";
+      return;
+    }
+
+    newBtn.disabled = true;
+    document.getElementById('game-launcher').style.display = 'none';
+    window.startGame();
+  });
+}

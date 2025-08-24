@@ -34,8 +34,15 @@ const gameConfig = {
 // 啟動遊戲函數（從 control.js 調用）
 function startGame() {
     console.log('嘗試啟動遊戲...');
+
+    const placeholder = document.querySelector('#game-frame .placeholder');
+    if (placeholder) {
+        placeholder.remove(); // 清掉嵌入提示
+    }
+
     if (!game) {
         try {
+            destroyGame();
             game = new Phaser.Game(gameConfig);
             console.log('遊戲啟動成功');
         } catch (error) {
@@ -45,8 +52,25 @@ function startGame() {
         console.log('遊戲已經啟動');
     }
 }
-window.startGame = startGame;
 
-window.addEventListener('DOMContentLoaded', () => {
-    startGame();
-});
+
+// 清除遊戲啟動檔案
+function destroyGame() {
+    if (game) {
+        try {
+            game.destroy(true); // ✅ 銷毀並清除 canvas
+            console.log('遊戲已銷毀');
+        } catch (error) {
+            console.warn('銷毀遊戲時發生錯誤:', error);
+        }
+        game = null;
+    }
+}
+
+window.startGame = startGame;
+window.destroyGame = destroyGame;
+
+// 用在test_game.html用的，用index.html時記得註解
+// window.addEventListener('DOMContentLoaded', () => {
+//     startGame();
+// });

@@ -51,15 +51,6 @@ export class GameScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.cameras.main.setFollowOffset(-100, 0);
 
-        // // 主角面相
-        // this.player.flipX = true;  // 面向左
-        // this.player.flipX = false; // 面向右
-        
-        // // 衝刺
-        // this.dash = new Dash(this, this.player, this.cursors);
-        // // 跳躍
-        // this.jump = new Jump(this, this.player, this.cursors);
-
         // 調整全局重力
         this.physics.world.gravity.y = 1200;
         // 控制
@@ -75,43 +66,5 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (!this.isGameActive) return;
         this.playerController.update();
-        // // 時間邏輯
-        // const now = this.time.now;
-        // // 貼牆跳狀態
-        // const onWallLeft = this.player.body.blocked.left || this.player.body.touching.left;
-        // const onWallRight = this.player.body.blocked.right || this.player.body.touching.right;
-        // const isTouchingWall = onWallLeft || onWallRight;
-        // const isGrounded = this.player.body.touching.down;
-
-        // // 是否處於牆滑狀態
-        // const isFalling = this.player.body.velocity.y > 0;
-
-        // // 衝刺
-        // this.dash.update(now, isGrounded, isTouchingWall);
-        // // 跳躍
-        // this.jump.update(now, isGrounded, isTouchingWall, isFalling, onWallLeft);
-
-        // // 左右移動
-        // if (this.dash.isDashing || now < this.lockHorizontalUntil) {
-        //     if (this.dash.isDashing) {
-        //     } else {
-        //         // 鎖定期間：維持跳開方向
-        //         this.player.setVelocityX(300 * this.wallJumpDirection);
-        //     }
-        // } else {
-        //     // 正常控制
-        //     if (this.cursors.left.isDown) {
-        //         this.player.setVelocityX(-225);
-        //         this.player.flipX = true;
-        //     } else if (this.cursors.right.isDown) {
-        //         this.player.setVelocityX(225);
-        //         this.player.flipX = false;
-        //     } else {
-        //         this.player.setVelocityX(0);
-        //     }
-        // }
-
-
     }
-    
 }

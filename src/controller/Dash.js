@@ -69,7 +69,8 @@ export default class Dash {
             this.player.setMaxVelocity(300, 600);
         });
 
-        console.log(`Dash triggered: ${dashDirection > 0 ? '→' : '←'}`);
+        // 在網頁端的開發者模式中(F12)查看是否觸發
+        // console.log(`Dash triggered: ${dashDirection > 0 ? '→' : '←'}`);
     }
 
     isInputLocked(now) {
