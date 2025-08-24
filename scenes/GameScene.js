@@ -49,6 +49,9 @@ export class GameScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.cameras.main.setFollowOffset(-100, 0);
 
+        // 主角面相
+        this.player.flipX = true;  // 面向左
+        this.player.flipX = false; // 面向右
         // 控制
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -78,6 +81,15 @@ export class GameScene extends Phaser.Scene {
         this.isWallSliding = false;
         this.wallSlideSpeed = 120; //下滑速度
 
+        // 衝刺功能
+        this.isDashing = false;
+        this.dashDuration = 250;
+        this.dashSpeed = 600;
+        this.dashCooldown = 500;
+        this.lastDashTime = 0;
+        // 暫時設定衝刺鍵為K(之後可在Setting裡面改)
+        this.dashKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
+
         console.log('場景創建完成');
         this.isGameActive = true;
     }
@@ -86,7 +98,7 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (!this.isGameActive) return;
 
-        // 跳躍邏輯
+        // 時間邏輯
         const now = this.time.now;
         // 貼牆跳狀態
         const onWallLeft = this.player.body.blocked.left || this.player.body.touching.left;
@@ -110,6 +122,14 @@ export class GameScene extends Phaser.Scene {
             }
         }
 
+        // 衝刺判斷
+        if (
+            Phaser.Input.Keyboard.JustDown(this.dashKey) &&
+            !this.isDashing &&
+            now > this.lastDashTime + this.dashCooldown
+        ) {
+            this.startDash(now);
+        }
 
         // 允許牆跳
         if (isTouchingWall && !this.canWallJump) {
@@ -117,15 +137,22 @@ export class GameScene extends Phaser.Scene {
         }
 
         // 左右移動
-        if (now < this.lockHorizontalUntil) {
-            // 鎖定期間：維持跳開方向
-            this.player.setVelocityX(300 * this.wallJumpDirection);
+        if (this.isDashing || now < this.lockHorizontalUntil) {
+
+            if (this.isDashing) {
+
+            } else {
+                // 鎖定期間：維持跳開方向
+                this.player.setVelocityX(300 * this.wallJumpDirection);
+            }
         } else {
             // 正常控制
             if (this.cursors.left.isDown) {
-                this.player.setVelocityX(-200);
+                this.player.setVelocityX(-225);
+                this.player.flipX = true;
             } else if (this.cursors.right.isDown) {
-                this.player.setVelocityX(200);
+                this.player.setVelocityX(225);
+                this.player.flipX = false;
             } else {
                 this.player.setVelocityX(0);
             }
@@ -214,5 +241,34 @@ export class GameScene extends Phaser.Scene {
             this.isWallJumping = false;
         }
 
+    }
+    // 衝刺功能
+    startDash(now) {
+        this.isDashing = true;
+        this.lastDashTime = now;
+        this.player.body.allowGravity = false;
+        this.player.setMaxVelocity(600, 600);
+
+        // 判斷衝刺方向（根據左右鍵）
+        let dashDirection = 0;
+        if (this.cursors.left.isDown) dashDirection = -1;
+        else if (this.cursors.right.isDown) dashDirection = 1;
+
+        if (dashDirection === 0) dashDirection = this.player.flipX ? -1 : 1; // 沒按方向鍵就用角色朝向
+
+        this.player.setVelocityX(this.dashSpeed * dashDirection);
+        this.player.setVelocityY(0); // 可選：空中衝刺時鎖定垂直速度
+
+        // 衝刺期間鎖定輸入
+        this.inputLockUntil = now + this.dashDuration;
+
+        // 結束衝刺
+        this.time.delayedCall(this.dashDuration, () => {
+            this.isDashing = false;
+            this.player.body.allowGravity = true;
+            this.player.setMaxVelocity(300, 600);
+        });
+
+        console.log(`Dash triggered: ${dashDirection > 0 ? '→' : '←'}`);
     }
 }
