@@ -26,6 +26,12 @@ export default class Jump {
         this.wasJumpKeyDown = false;
 
         this.player.setMaxVelocity(300, 600); //最大Y速度
+
+        // 二段跳
+        this.maxDoubleJumps = 1;
+        this.doubleJumpsRemaining = this.maxDoubleJumps;
+        this.doubleJumpVelocity = this.jumpVelocity * 1.5; // 高度是大跳的一半
+
     }
 
     update(now, isGrounded, isTouchingWall, isFalling, onWallLeft) {
@@ -118,6 +124,21 @@ export default class Jump {
                 this.isWallJumping = false;
             }
         }
+        // 二段跳邏輯
+        if (
+            this.cursors.up.isDown &&
+            !this.wasJumpKeyDown &&
+            !isGrounded &&
+            !this.isWallJumping &&
+            !this.isJumping &&
+            this.doubleJumpsRemaining > 0
+        ) {
+            this.doubleJumpsRemaining--;
+            this.player.setVelocityY(this.doubleJumpVelocity);
+            this.isJumping = false;
+            console.log('Double Jump!');
+        }
+
 
         if (!isTouchingWall) {
             this.canWallJump = false;
@@ -129,9 +150,11 @@ export default class Jump {
 
         this.wasJumpKeyDown = this.cursors.up.isDown;
 
+        // 落地判斷
         if (!this.cursors.up.isDown && this.player.body.touching.down && !this.isJumping) {
             this.canJump = true;
             this.isWallJumping = false;
+            this.doubleJumpsRemaining = this.maxDoubleJumps;
         }
 
     }
