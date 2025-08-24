@@ -57,13 +57,13 @@ export class GameScene extends Phaser.Scene {
 
         // 跳躍狀態初始化
         this.isJumping = false;
-        this.jumpStartTime = 0;
+        this.jumpStartTime = 0; //跳躍時間紀錄
         this.maxJumpDuration = 350; // 最長跳躍時間（毫秒）
         this.jumpVelocity = -350;   // 每幀施加的跳躍速度
-        this.player.setMaxVelocity(300, 600);
+        this.player.setMaxVelocity(300, 600); //最大Y速度
         this.canJump = true; // 是否允許跳躍（需釋放後才能再次跳
         this.canWallJump = false; //是否允許牆跳，先初始化
-        
+
         // 牆跳的判斷式
         // 是否跳牆，初始化
         this.isWallJumping = false;
@@ -73,6 +73,10 @@ export class GameScene extends Phaser.Scene {
         this.wallJumpDirection = 0;
         // 牆跳時鎖定方向鍵
         this.lockHorizontalUntil = 0;
+
+        // 牆滑設置
+        this.isWallSliding = false;
+        this.wallSlideSpeed = 120; //下滑速度
 
         console.log('場景創建完成');
         this.isGameActive = true;
@@ -89,6 +93,23 @@ export class GameScene extends Phaser.Scene {
         const onWallRight = this.player.body.blocked.right || this.player.body.touching.right;
         const isTouchingWall = onWallLeft || onWallRight;
         const isGrounded = this.player.body.touching.down;
+
+        // 是否處於牆滑狀態
+        const isFalling = this.player.body.velocity.y > 0;
+
+        this.isWallSliding = (
+            isTouchingWall &&
+            !isGrounded &&
+            isFalling &&
+            !this.isWallJumping
+        );
+
+        if (this.isWallSliding) {
+            if (this.player.body.velocity.y > this.wallSlideSpeed) {
+                this.player.setVelocityY(this.wallSlideSpeed); // 緩慢下墜
+            }
+        }
+
 
         // 允許牆跳
         if (isTouchingWall && !this.canWallJump) {
@@ -141,14 +162,14 @@ export class GameScene extends Phaser.Scene {
             }
         }
 
-        // 牆跳
-        if (
+        // 牆跳狀態判斷
+        if ( //條件
             this.cursors.up.isDown &&
             !this.wasJumpKeyDown &&
             !isGrounded &&
             isTouchingWall &&
-            !this.isWallJumping 
-        ) {
+            !this.isWallJumping
+        ) { //執行
             this.isWallJumping = true;
             this.wallJumpStartTime = now;
             this.lockHorizontalUntil = now + 200;
@@ -162,7 +183,7 @@ export class GameScene extends Phaser.Scene {
 
             return; // 跳牆時不進入地面跳邏輯
         }
-
+        // 牆跳邏輯
         if (this.isWallJumping) {
             const jumpElapsed = now - this.wallJumpStartTime;
             const progress = Phaser.Math.Clamp(jumpElapsed / this.maxJumpDuration, 0, 1);
@@ -182,6 +203,10 @@ export class GameScene extends Phaser.Scene {
             this.canWallJump = false;
         }
 
+        if (!isTouchingWall || isGrounded) {
+            this.isWallSliding = false;
+        }
+
         this.wasJumpKeyDown = this.cursors.up.isDown;
 
         if (!this.cursors.up.isDown && this.player.body.touching.down && !this.isJumping) {
@@ -191,236 +216,3 @@ export class GameScene extends Phaser.Scene {
 
     }
 }
-
-
-
-
-// export class GameScene extends Phaser.Scene {
-//     constructor() {
-//         super('GameScene');
-//         this.isGameActive = false;
-//     }
-
-//     // 資源加載
-//     preload() {
-//         // 使用簡單幾何圖形代替精靈（暫時不用美術資源）
-//         // 玩家：紅色方塊
-//         const playerGfx = this.add.graphics();
-//         playerGfx.fillStyle(0xff0000, 1);
-//         playerGfx.fillRect(0, 0, 40, 56);
-//         playerGfx.generateTexture('player', 40, 56);
-//         playerGfx.destroy();
-
-//         // 平台：棕色長條
-//         const platformGfx = this.add.graphics();
-//         platformGfx.fillStyle(0x8B4513, 1);
-//         platformGfx.fillRect(0, 0, 100, 20);
-//         platformGfx.generateTexture('platform', 100, 20);
-//         platformGfx.destroy();
-//     }
-
-//     create() {
-//         console.log('創建遊戲場景...');
-
-//         // 測試玩家
-//         this.player = this.physics.add.sprite(400, 300, 'player');
-//         this.player.setTint(0xff0000); // 紅色標記
-//         this.player.setCollideWorldBounds(true);
-
-//         // 測試平台
-//         this.platforms = this.physics.add.staticGroup();
-//         this.platforms.create(400, 568, 'platform').setScale(10, 1).refreshBody();
-//         this.platforms.create(600, 400, 'platform').setScale(3, 1).refreshBody();
-//         this.platforms.create(200, 250, 'platform').setScale(3, 1).refreshBody();
-//         this.platforms.create(1200, 500, 'platform').setScale(3, 1).refreshBody();
-//         this.platforms.create(1800, 300, 'platform').setScale(3, 1).refreshBody();
-
-//         this.physics.add.collider(this.player, this.platforms);
-
-//         // 設定地圖大小
-//         this.cameras.main.setBounds(0, 0, 2000, 1500);
-//         this.physics.world.setBounds(0, 0, 2000, 1500);
-
-//         // 鏡頭跟隨主角
-//         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-//         this.cameras.main.setFollowOffset(-100, 0);
-
-//         // 控制
-//         this.cursors = this.input.keyboard.createCursorKeys();
-
-//         // 調整全局重力
-//         this.physics.world.gravity.y = 1200;
-
-//         // 跳躍狀態初始化
-//         this.isJumping = false;
-//         this.jumpStartTime = 0;
-//         this.maxJumpDuration = 350; // 最長跳躍時間（毫秒）
-//         this.jumpVelocity = -450;   // 初始跳躍速度
-//         this.player.setMaxVelocity(400, 800);
-//         this.canJump = true;
-
-//         // 牆跳相關狀態
-//         this.isWallSliding = false;
-//         this.isWallJumping = false;
-//         this.wallJumpStartTime = 0;
-//         this.wallJumpCooldown = 0;
-//         this.wallSlideSpeed = 100; // 滑牆速度
-//         this.lastWallSide = 0; // 記錄上次接觸的牆面方向
-
-//         // 調試信息
-//         this.debugText = this.add.text(10, 10, '', {
-//             fontSize: '16px',
-//             fill: '#fff',
-//             backgroundColor: '#000',
-//             padding: { x: 5, y: 5 }
-//         }).setScrollFactor(0);
-
-//         console.log('場景創建完成');
-//         this.isGameActive = true;
-//     }
-
-//     update() {
-//         if (!this.isGameActive) return;
-
-//         const now = this.time.now;
-
-//         // 碰撞檢測 - 使用更可靠的方法
-//         const onWallLeft = this.player.body.blocked.left || this.player.body.touching.left;
-//         const onWallRight = this.player.body.blocked.right || this.player.body.touching.right;
-//         const isGrounded = this.player.body.blocked.down || this.player.body.touching.down;
-//         const isFalling = this.player.body.velocity.y > 0;
-//         const isTouchingWall = onWallLeft || onWallRight;
-
-//         // 記錄牆面方向
-//         if (onWallLeft) this.lastWallSide = -1;
-//         if (onWallRight) this.lastWallSide = 1;
-
-//         // 調試信息
-//         this.debugText.setText([
-//             `Grounded: ${isGrounded}`,
-//             `Wall Left: ${onWallLeft}`,
-//             `Wall Right: ${onWallRight}`,
-//             `Wall Sliding: ${this.isWallSliding}`,
-//             `Wall Jumping: ${this.isWallJumping}`,
-//             `Velocity: ${Math.round(this.player.body.velocity.x)}, ${Math.round(this.player.body.velocity.y)}`,
-//             `Last Wall: ${this.lastWallSide}`
-//         ]);
-
-//         // 重置狀態
-//         if (isGrounded) {
-//             this.canJump = true;
-//             this.isJumping = false;
-//             this.isWallJumping = false;
-//             this.isWallSliding = false;
-//         }
-
-//         // 檢查是否應該滑牆
-//         this.isWallSliding = isTouchingWall && !isGrounded && isFalling && !this.isWallJumping;
-
-//         // 滑牆邏輯
-//         if (this.isWallSliding) {
-//             if (this.player.body.velocity.y > this.wallSlideSpeed) {
-//                 this.player.setVelocityY(this.wallSlideSpeed);
-//             }
-//         }
-
-//         // 水平移動控制
-//         this.handleHorizontalMovement();
-
-//         // 跳躍處理
-//         this.handleJumping(now, isGrounded, isTouchingWall, onWallLeft, onWallRight);
-
-//         // 變高跳躍處理（適用於地面跳和牆跳）
-//         this.handleVariableJump(now);
-//     }
-
-//     handleHorizontalMovement() {
-//         // 正常的水平移動
-//         if (this.cursors.left.isDown) {
-//             this.player.setVelocityX(-200);
-//         } else if (this.cursors.right.isDown) {
-//             this.player.setVelocityX(200);
-//         } else {
-//             // 只有在不是牆跳狀態時才停止水平移動
-//             if (!this.isWallJumping) {
-//                 this.player.setVelocityX(0);
-//             }
-//         }
-//     }
-
-//     handleJumping(now, isGrounded, isTouchingWall, onWallLeft, onWallRight) {
-//         const jumpPressed = Phaser.Input.Keyboard.JustDown(this.cursors.up);
-
-//         if (jumpPressed) {
-//             if (isGrounded && this.canJump) {
-//                 // 地面跳躍
-//                 this.startNormalJump(now);
-//             } else if (this.isWallSliding && now > this.wallJumpCooldown) {
-//                 // 牆跳
-//                 this.startWallJump(now, onWallLeft, onWallRight);
-//             }
-//         }
-//     }
-
-//     startNormalJump(now) {
-//         this.isJumping = true;
-//         this.jumpStartTime = now;
-//         this.player.setVelocityY(this.jumpVelocity);
-//         this.canJump = false;
-//         console.log('Normal jump');
-//     }
-
-//     startWallJump(now, onWallLeft, onWallRight) {
-//         // 決定跳躍方向
-//         let jumpDirection = 0;
-//         if (onWallLeft) {
-//             jumpDirection = 1; // 向右跳
-//         } else if (onWallRight) {
-//             jumpDirection = -1; // 向左跳
-//         }
-
-//         if (jumpDirection !== 0) {
-//             // 執行牆跳 - 使用與地面跳躍相同的垂直力度
-//             this.player.setVelocityX(250 * jumpDirection); // 水平速度
-//             this.player.setVelocityY(this.jumpVelocity);   // 垂直速度與地面跳躍相同
-
-//             // 設置牆跳狀態
-//             this.isWallJumping = true;
-//             this.wallJumpStartTime = now;
-//             this.isWallSliding = false;
-//             this.wallJumpCooldown = now + 100; // 短暫冷卻防止重複觸發
-
-//             console.log(`Wall jump direction: ${jumpDirection}`);
-//         }
-//     }
-
-//     handleVariableJump(now) {
-//         // 處理變高跳躍 - 適用於地面跳和牆跳
-//         if (this.isJumping || this.isWallJumping) {
-//             let jumpElapsed;
-
-//             if (this.isWallJumping) {
-//                 jumpElapsed = now - this.wallJumpStartTime;
-//             } else {
-//                 jumpElapsed = now - this.jumpStartTime;
-//             }
-
-//             // 如果還在按跳躍鍵且未超時，繼續施加向上力
-//             if (this.cursors.up.isDown && jumpElapsed < this.maxJumpDuration) {
-//                 // 使用緩減的跳躍力度來實現變高跳躍
-//                 const progress = jumpElapsed / this.maxJumpDuration;
-//                 const jumpForce = this.jumpVelocity * (1 - progress * 0.3); // 力度逐漸減小
-//                 this.player.setVelocityY(jumpForce);
-//             } else {
-//                 // 停止跳躍
-//                 this.isJumping = false;
-//                 this.isWallJumping = false;
-//             }
-//         }
-
-//         // 重置跳躍權限
-//         if (this.cursors.up.isUp) {
-//             this.canJump = true;
-//         }
-//     }
-// }
