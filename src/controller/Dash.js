@@ -16,7 +16,7 @@ export default class Dash {
         this.airDashesRemaining = this.maxAirDashes;
 
         // 暫時設定衝刺鍵為K(之後可在Setting裡面改)
-        this.dashKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
+        this.dashKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
 
     }
 

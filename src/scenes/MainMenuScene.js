@@ -10,10 +10,10 @@ export class MainMenuScene extends Phaser.Scene {
 
 
     const textStyle = {
-      fontFamily: 'Arial', // ✅ 或 'Noto Sans TC'（支援繁體中文）
+      fontFamily: 'Arial', 
       fontSize: '32px',
       color: '#ffffff',
-      padding: { top: 10, bottom: 10 }, // ✅ 增加上下空間避免裁切
+      padding: { top: 10, bottom: 10 }, // 增加上下空間避免裁切
       align: 'center'
     };
 

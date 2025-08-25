@@ -1,18 +1,22 @@
 import Dash from "./Dash.js";
 import Jump from "./Jump.js";
 import PlayerStatus from "./PlayerStatus.js";
+import Attack from "./combat/attack.js";
 
 export default class PlayerController {
-    constructor(scene, player, cursors) {
+    constructor(scene, player, cursors, enemyGroup) {
         this.scene = scene;
         this.player = player;
         this.cursors = cursors;
+        this.enemyGroup = enemyGroup;
         // 玩家狀態
         this.status = new PlayerStatus(player, scene);
         // 衝刺
         this.dash = new Dash(this.scene, this.player, this.cursors);
         // 跳躍
         this.jump = new Jump(this.scene, this.player, this.cursors);
+        // 攻擊
+        this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup);
 
         // 牆跳鎖定控制（由 Jump 模組更新後同步）
         this.lockHorizontalUntil = 0;
@@ -22,6 +26,8 @@ export default class PlayerController {
     update() {
         // 更新玩家狀態
         this.status.update();
+        // 玩家攻擊狀態
+        this.attack.update();
 
         // 左右移動邏輯
         const now = this.status.now;
