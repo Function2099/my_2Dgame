@@ -1,5 +1,7 @@
 import PlayerController from "../controller/PlayerController.js"
 import PauseMenu from "../ui/PauseMenu.js";
+import EnemyManager from "../enemies/EnemyManager.js";
+import PlatformManager from "../platforms/PlatformManager.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -44,27 +46,23 @@ export class GameScene extends Phaser.Scene {
         this.player.setTint(0xff0000); // 紅色標記
         this.player.setCollideWorldBounds(true);
 
-        // 生成敵人群組（靜態）
-        this.enemies = this.physics.add.staticGroup();
-        this.enemyGroup = this.enemies;
+        // // 生成敵人群組（靜態）
+        // this.enemies = this.physics.add.staticGroup();
+        // this.enemyGroup = this.enemies;
 
+        // 平台管理
+        this.platformManager = new PlatformManager(this);
+        this.platformManager.createPlatforms();
+        
         // 生成敵人（使用 sprite）
-        const enemy = this.enemies.create(500, 300, 'enemy');
-        enemy.setOrigin(0.5);
-        enemy.hitCount = 0;
-        enemy.takeHit = function () {
-            this.hitCount += 1;
-            console.log(`Enemy 被打第 ${this.hitCount} 次`);
-        };
-
-        // 測試平台
-        this.platforms = this.physics.add.staticGroup();
-        this.platforms.create(400, 568, 'platform').setScale(10, 1).refreshBody();
-        this.platforms.create(600, 400, 'platform').setScale(3, 1).refreshBody();
-        this.platforms.create(200, 250, 'platform').setScale(3, 1).refreshBody();
-        this.platforms.create(1200, 500, 'platform').setScale(3, 1).refreshBody();
-        this.platforms.create(1800, 300, 'platform').setScale(3, 1).refreshBody();
-        this.physics.add.collider(this.player, this.platforms);
+        this.enemyManager = new EnemyManager(this);
+        this.enemyManager.spawn(500, 300);
+        this.enemyManager.spawn(800, 300);
+        this.enemyManager.spawn(1200, 400);
+        
+        this.enemyGroup = this.enemyManager.getGroup();
+        
+        this.physics.add.collider(this.enemyGroup, this.platformManager.getGroup());
 
         // 設定地圖大小
         this.cameras.main.setBounds(0, 0, 2000, 1500);
@@ -76,8 +74,10 @@ export class GameScene extends Phaser.Scene {
 
         // 調整全局重力
         this.physics.world.gravity.y = 1200;
+
         // 控制
         this.cursors = this.input.keyboard.createCursorKeys();
+
         // 玩家控制邏輯
         this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup);
 

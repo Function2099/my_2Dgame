@@ -1,8 +1,9 @@
 export default class Jump {
-    constructor(scene, player, cursors) {
+    constructor(scene, player, cursors, playerStatus) {
         this.scene = scene;
         this.player = player;
         this.cursors = cursors;
+        this.playerStatus = playerStatus;
 
         // 普通跳
         this.isJumping = false; // 跳躍狀態初始化
@@ -85,6 +86,7 @@ export default class Jump {
             }
         }
 
+
         // 牆跳狀態判斷
         if ( //條件
             this.cursors.up.isDown &&
@@ -93,6 +95,21 @@ export default class Jump {
             isTouchingWall &&
             !this.isWallJumping
         ) { //執行
+            console.log('Jump.js 設定前 playerStatus:', this.playerStatus);
+
+            if (this.playerStatus) {
+                this.playerStatus.isWallJumpLocking = true;
+                this.playerStatus.wallJumpLockDirection = onWallLeft ? 'right' : 'left';
+                this.playerStatus.wallJumpDirection = onWallLeft ? 1 : -1;
+                this.playerStatus.justWallJumped = true;
+
+                this.scene.time.delayedCall(450, () => {
+                    this.playerStatus.isWallJumpLocking = false;
+                    this.playerStatus.wallJumpLockDirection = null;
+                    this.playerStatus.justWallJumped = false;
+                });
+            }
+
             this.isWallJumping = true;
             this.wallJumpStartTime = now;
             this.lockHorizontalUntil = now + 200;
@@ -109,6 +126,7 @@ export default class Jump {
 
             return;
         }
+
         // 牆跳邏輯
         if (this.isWallJumping) {
             const jumpElapsed = now - this.wallJumpStartTime;
@@ -124,6 +142,7 @@ export default class Jump {
                 this.isWallJumping = false;
             }
         }
+
         // 二段跳邏輯
         if (
             this.cursors.up.isDown &&
@@ -136,7 +155,7 @@ export default class Jump {
             this.doubleJumpsRemaining--;
             this.player.setVelocityY(this.doubleJumpVelocity);
             this.isJumping = false;
-            console.log('Double Jump!');
+            // console.log('Double Jump!');
         }
 
 

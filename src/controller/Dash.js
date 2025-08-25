@@ -15,7 +15,7 @@ export default class Dash {
         this.maxAirDashes = 1;
         this.airDashesRemaining = this.maxAirDashes;
 
-        // 暫時設定衝刺鍵為K(之後可在Setting裡面改)
+        // 暫時設定衝刺鍵為X(之後可在Setting裡面改)
         this.dashKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
 
     }
@@ -57,7 +57,7 @@ export default class Dash {
         if (dashDirection === 0) dashDirection = this.player.flipX ? -1 : 1; // 沒按方向鍵就用角色朝向
 
         this.player.setVelocityX(this.dashSpeed * dashDirection);
-        this.player.setVelocityY(0); // 可選：空中衝刺時鎖定垂直速度
+        this.player.setVelocityY(0); // 空中衝刺時鎖定垂直速度
 
         // 衝刺期間鎖定輸入
         this.inputLockUntil = now + this.dashDuration;

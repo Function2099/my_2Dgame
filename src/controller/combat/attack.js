@@ -1,9 +1,10 @@
 export default class Attack {
-    constructor(scene, player, input, enemyGroup) {
+    constructor(scene, player, input, enemyGroup, playerStatus) {
         this.scene = scene
         this.player = player
         this.input = input
         this.enemyGroup = enemyGroup; //攻擊敵人用的
+        this.playerStatus = playerStatus;
 
         // 攻擊冷卻
         this.attackCooldown = 300;
@@ -19,6 +20,8 @@ export default class Attack {
             forward: this.scene.add.rectangle(0, 0, 60, 60, 0xff0000, 0).setOrigin(0.5),
             up: this.scene.add.rectangle(0, 0, 60, 60, 0x00ff00, 0).setOrigin(0.5),
             down: this.scene.add.rectangle(0, 0, 60, 50, 0x0000ff, 0).setOrigin(0.5),
+            forwardLeft: this.scene.add.rectangle(0, 0, 60, 60, 0xffaaaa, 0).setOrigin(0.5),
+            forwardRight: this.scene.add.rectangle(0, 0, 60, 60, 0xaaffaa, 0).setOrigin(0.5),
         };
 
         Object.entries(this.hitboxes).forEach(([dir, hitbox]) => {
@@ -88,6 +91,7 @@ export default class Attack {
             this.lastAttackTime = now;
             this.performAttack();
         }
+
     }
 
     performAttack() {
@@ -131,14 +135,39 @@ export default class Attack {
                 if (!hb._hitThisAttack) {
                     enemy.takeHit();
                     hb._hitThisAttack = true;
+
+                    if (
+                        this.activeHitboxDirection === 'down' &&
+                        !this.player.body.onFloor() // 角色不在地面
+                    ) {
+                        this.player.setVelocityY(-400); // 彈起速度，可微調
+                        this.playerStatus.resetAirAbilities();
+                    }
                 }
             }
         );
+
+        console.log('攻擊方向:', this.getAttackDirection());
+        console.log('鎖定中:', this.playerStatus.isWallJumpLocking, '方向:', this.playerStatus.wallJumpLockDirection);
+        console.log('牆跳方向:', this.playerStatus.wallJumpDirection);
+        console.log('justWallJumped:', this.playerStatus.justWallJumped);
     }
 
     getAttackDirection() {
+        const status = this.playerStatus;
+
+        // 牆跳鎖定期間 → 強制使用鎖定方向
+        if (status.isWallJumpLocking && status.wallJumpLockDirection) {
+            return status.wallJumpLockDirection === 'left' ? 'forwardLeft' : 'forwardRight';
+        }
+
+        if ((status.onWallLeft || status.onWallRight) && !this.player.body.onFloor()) {
+            return status.onWallLeft ? 'forwardRight' : 'forwardLeft';
+        }
+
         if (this.input.up.isDown) return 'up';
         if (this.input.down.isDown) return 'down';
+
         return 'forward';
     }
 
@@ -156,6 +185,10 @@ export default class Attack {
                 return { x: velocityX * 0.05, y: 30 + speedCompY };
             case 'forward':
                 return { x: facing * (30 + speedComp), y: 0 };
+            case 'forwardLeft':
+                return { x: -30, y: 0 };
+            case 'forwardRight':
+                return { x: 30, y: 0 };
         }
     }
 

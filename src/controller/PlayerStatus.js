@@ -10,7 +10,8 @@ export default class PlayerStatus {
         this.isTouchingWall = false;
         this.isGrounded = false;
         this.isFalling = false;
-
+        this.isWallJumpLocking = false;
+        this.wallJumpLockDirection = null;
     }
     update() {
         const body = this.player.body;
@@ -23,6 +24,26 @@ export default class PlayerStatus {
         this.isGrounded = body.blocked.down || body.touching.down;
         // 是否處於牆滑狀態
         this.isFalling = body.velocity.y > 0;
+    }
+
+    setJumpModule(jump) {
+        this.jumpModule = jump;
+    }
+
+    setDashModule(dash) {
+        this.dashModule = dash;
+    }
+
+    // 空中狀態
+    resetAirAbilities() {
+        if (this.jumpModule) {
+            this.jumpModule.doubleJumpsRemaining = this.jumpModule.maxDoubleJumps;
+            // console.log('強制重置跳:', this.jumpModule.doubleJumpsRemaining);
+        }
+        if (this.dashModule) {
+            this.dashModule.airDashesRemaining = this.dashModule.maxAirDashes;
+            // console.log('強制重置衝:', this.dashModule.airDashesRemaining);
+        }
     }
 
 }

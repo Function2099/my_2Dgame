@@ -1,7 +1,7 @@
 import Dash from "./Dash.js";
 import Jump from "./Jump.js";
 import PlayerStatus from "./PlayerStatus.js";
-import Attack from "./combat/attack.js";
+import Attack from "./combat/Attack.js";
 
 export default class PlayerController {
     constructor(scene, player, cursors, enemyGroup) {
@@ -13,10 +13,16 @@ export default class PlayerController {
         this.status = new PlayerStatus(player, scene);
         // 衝刺
         this.dash = new Dash(this.scene, this.player, this.cursors);
+        this.status.setDashModule(this.dash);
+        console.log('重置衝:', this.dashModule?.airDashesRemaining);
+
         // 跳躍
-        this.jump = new Jump(this.scene, this.player, this.cursors);
+        this.jump = new Jump(this.scene, this.player, this.cursors, this.status);
+        this.status.setJumpModule(this.jump);
+        console.log('重置跳:', this.jumpModule?.doubleJumpsRemaining);
+
         // 攻擊
-        this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup);
+        this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup, this.status);
 
         // 牆跳鎖定控制（由 Jump 模組更新後同步）
         this.lockHorizontalUntil = 0;
@@ -57,8 +63,6 @@ export default class PlayerController {
                 this.player.setVelocityX(0);
             }
         }
-
-
 
     }
 
