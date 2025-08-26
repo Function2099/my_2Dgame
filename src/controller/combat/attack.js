@@ -109,6 +109,11 @@ export default class Attack {
         const direction = this.getAttackDirection();
         const hitbox = this.hitboxes[direction];
 
+        // 每次攻擊前清除所有敵人的命中標記
+        this.enemyGroup.getChildren().forEach(enemy => {
+            enemy._hitThisAttack = false;
+        });
+
         if (!hitbox) return;
 
         // 設定hitbox位置
@@ -144,7 +149,6 @@ export default class Attack {
                 //     Math.abs(hb.y - enemy.y)
                 // );
 
-                if (hb._hitThisAttack) return;
                 const line = new Phaser.Geom.Line(hb.x, hb.y, enemy.x, enemy.y);
 
                 // 判斷是否被平台遮擋
@@ -155,8 +159,10 @@ export default class Attack {
                 if (blocked) return; // 被平台擋住，攻擊無效
 
                 // 沒被擋住 → 正常攻擊
+                if (enemy._hitThisAttack) return; // ✅ 每個敵人只吃一次
+                enemy._hitThisAttack = true;
+
                 enemy.takeHit(this.player.x, this.activeHitboxDirection);
-                hb._hitThisAttack = true;
 
                 if (
                     this.activeHitboxDirection === 'down' &&

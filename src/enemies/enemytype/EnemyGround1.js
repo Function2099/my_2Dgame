@@ -2,11 +2,12 @@ import EnemyBase from "../EnemyBase.js";
 
 export default class EnemyGround1 extends EnemyBase {
     constructor(scene, x, y) {
-        super(scene, x, y, 'enemy');
+        super(scene, x, y, 'mummy_idle');
 
         this.setDisplaySize(36, 50);
 
         this.isHit = false;
+        this.play('mummy_idle');
 
         this.detectionRange = 250;
         this.attackCooldown = 2000;
@@ -36,6 +37,9 @@ export default class EnemyGround1 extends EnemyBase {
         this.attackBox.x = this.x + offsetX;
         this.attackBox.y = this.y;
 
+        if (this.state === 'attack') {
+            return; // 攻擊期間不執行其他行為
+        }
         if (distance < this.detectionRange) {
             this.state = 'chase';
             this.chasePlayer(player);
@@ -68,11 +72,17 @@ export default class EnemyGround1 extends EnemyBase {
         const speedBoost = Phaser.Math.Clamp(distance * 0.1, 0, 40); // 最多加速 40px/s
         this.setVelocityX((this.chaseSpeed + speedBoost) * dir);
         this.flipX = dir < 0;
+        if (this.anims.currentAnim?.key !== 'mummy_walk') {
+            this.play('mummy_walk', true);
+        }
     }
 
     patrol() {
         this.setVelocityX(this.speed * this.direction);
         this.flipX = this.direction < 0;
+        if (this.anims.currentAnim?.key !== 'mummy_walk') {
+            this.play('mummy_walk', true);
+        }
 
         if (!this.hasGroundAhead()) {
             this.direction *= -1;
@@ -92,11 +102,30 @@ export default class EnemyGround1 extends EnemyBase {
         );
     }
 
-    attack(playerStatus) {
-        console.log('玩家被敵人攻擊命中');
-        this.showAttackBox();
-        playerStatus.takeHit(this.x);
-    }
+attack(playerStatus) {
+    this.state = 'attack';
+    this.attackFrameTriggered = false;
+    this.play('mummy_attack');
+
+    const totalFrames = this.anims.currentAnim?.frames.length || 4; // 預設4幀
+    const lastFrameIndex = totalFrames - 1;
+
+    this.on('animationupdate', (anim, frame) => {
+        if (anim.key === 'mummy_attack' && frame.index === lastFrameIndex && !this.attackFrameTriggered) {
+            this.attackFrameTriggered = true;
+            console.log('玩家被敵人攻擊命中');
+            this.showAttackBox();
+            playerStatus.takeHit(this.x);
+        }
+    });
+
+    this.once('animationcomplete', () => {
+        this.off('animationupdate');
+        const player = playerStatus.player;
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        this.state = distance < this.detectionRange ? 'chase' : 'patrol';
+    });
+}
 
     showAttackBox() {
         const g = this.scene.add.graphics();
@@ -113,6 +142,7 @@ export default class EnemyGround1 extends EnemyBase {
     takeHit(attackerX, direction) {
         this.hitCount++;
         this.isHit = true;
+        this.play('mummy_hurt', true);
 
         if (direction === 'down') {
             // console.log('下批命中：敵人不後退');

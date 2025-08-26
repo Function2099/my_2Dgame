@@ -11,6 +11,11 @@ export class GameScene extends Phaser.Scene {
 
     // 資源加載
     preload() {
+        this.load.spritesheet('mummy_idle', '../assets/enemies/Mummy_idle.png', { frameWidth: 48, frameHeight: 48 });
+        this.load.spritesheet('mummy_walk', '../assets/enemies/Mummy_walk.png', { frameWidth: 48, frameHeight: 48 });
+        this.load.spritesheet('mummy_attack', '../assets/enemies/Mummy_attack.png', { frameWidth: 48, frameHeight: 48 });
+        this.load.spritesheet('mummy_hurt', '../assets/enemies/Mummy_hurt.png', { frameWidth: 48, frameHeight: 48 });
+        this.load.spritesheet('mummy_death', '../assets/enemies/Mummy_death.png', { frameWidth: 48, frameHeight: 48 });
         // 使用簡單幾何圖形代替精靈（暫時不用美術資源）
         // 玩家：紅色方塊
         const playerGfx = this.add.graphics();
@@ -40,6 +45,24 @@ export class GameScene extends Phaser.Scene {
 
         // esc暫停和回到主選單功能
         this.pauseMenu = new PauseMenu(this);
+
+        const defineAnim = (key, texture, start, end, frameRate = 10, repeat = 0) => {
+            if (!this.anims.exists(key)) {
+                this.anims.create({
+                    key,
+                    frames: this.anims.generateFrameNumbers(texture, { start, end }),
+                    frameRate,
+                    repeat
+                });
+            }
+        };
+
+        defineAnim('mummy_idle', 'mummy_idle', 0, 3, 6, -1);
+        defineAnim('mummy_walk', 'mummy_walk', 0, 5, 10, -1);
+        defineAnim('mummy_attack', 'mummy_attack', 0, 5, 10, 0);
+        defineAnim('mummy_hurt', 'mummy_hurt', 0, 1, 10, 0);
+        defineAnim('mummy_death', 'mummy_death', 0, 5, 10, 0);
+
 
         // 玩家生成位置
         this.player = this.physics.add.sprite(400, 300, 'player');
@@ -81,6 +104,7 @@ export class GameScene extends Phaser.Scene {
         this.physics.world.debugGraphic.clear();
 
         console.log('場景創建完成');
+        console.log('動畫是否存在：', this.anims.exists('mummy_walk'));
         this.isGameActive = true;
     }
 
