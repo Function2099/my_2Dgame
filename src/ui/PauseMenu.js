@@ -15,6 +15,7 @@ export default class PauseMenu {
         this.overlay.setScrollFactor(0).setDepth(100);
 
         this.title = this.scene.add.text(width / 2, 150, '暫停選單', {
+            fontFamily: 'Arial',
             fontSize: '48px',
             color: '#ffffff'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
@@ -28,6 +29,7 @@ export default class PauseMenu {
 
     createButton(x, y, text, callback) {
         const btn = this.scene.add.text(x, y, text, {
+            fontFamily: 'Arial',
             fontSize: '32px',
             backgroundColor: '#444',
             padding: { x: 10, y: 5 },
@@ -40,11 +42,13 @@ export default class PauseMenu {
 
     pause() {
         this.scene.isGameActive = false;
+        this.scene.physics.world.pause()
         this.setVisible(true);
     }
 
     resume() {
         this.scene.isGameActive = true;
+        this.scene.physics.world.resume()
         this.setVisible(false);
     }
 

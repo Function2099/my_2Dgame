@@ -12,6 +12,7 @@ export default class PlayerStatus {
         this.isFalling = false;
         this.isWallJumpLocking = false;
         this.wallJumpLockDirection = null;
+        this.isKnockbacking = false;
     }
     update() {
         const body = this.player.body;
@@ -43,6 +44,45 @@ export default class PlayerStatus {
         if (this.dashModule) {
             this.dashModule.airDashesRemaining = this.dashModule.maxAirDashes;
             // console.log('強制重置衝:', this.dashModule.airDashesRemaining);
+        }
+    }
+
+    // 受攻擊狀態
+    takeHit(fromX = null) {
+        if (this.isInvincible || this.isKnockbacking) return; // 暫停玩家控制
+
+        // this.hp -= 1;剩餘 HP：${this.hp}
+        this.isInvincible = true;
+        this.isKnockbacking = true;
+
+        this.player.setTint(0xffffff); // 受傷閃白
+
+        const knockbackX = fromX !== null ? (this.player.x < fromX ? -1 : 1) : 0;
+        const knockbackForceX = 400 * knockbackX;
+        const knockbackForceY = -250; // 往上彈一點
+
+        this.player.setDragX(0);
+
+        this.player.setVelocity(knockbackForceX, knockbackForceY);
+        // console.log('knockback:', knockbackForceX, knockbackForceY);
+
+        this.scene.time.delayedCall(300, () => {
+            this.isKnockbacking = false;
+        });
+
+        this.scene.time.delayedCall(1000, () => {
+            this.isInvincible = false;
+            this.player.clearTint();
+        });
+
+        console.log(`玩家受擊！`);
+
+        if (this.hp <= 0) {
+            this.player.setVelocity(0, 0);
+            this.player.setTint(0x000000);
+            this.player.setActive(false);
+            this.player.setVisible(false);
+            console.log('玩家死亡');
         }
     }
 

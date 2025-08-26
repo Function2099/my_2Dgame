@@ -1,4 +1,4 @@
-export default class Enemy extends Phaser.Physics.Arcade.Sprite {
+export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture = 'enemy') {
         super(scene, x, y, texture);
         scene.add.existing(this);
@@ -12,17 +12,17 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.body.allowGravity = true;    // 開啟重力影響
 
         this.hitCount = 0;
+
+        // 敵人AI
+        this.state = 'idle'; // idle, patrol, chase, attack
+
     }
 
     takeHit() {
         this.hitCount++;
         console.log(`Enemy 被打第 ${this.hitCount} 次`);
-        if (this.hitCount >= 15) {
+        if (this.hitCount >= 3) {
             this.destroy(); // 或播放死亡動畫
         }
-    }
-
-    update() {
-        // 之後可以加巡邏、追擊邏輯
     }
 }

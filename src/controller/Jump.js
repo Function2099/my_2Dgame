@@ -95,7 +95,7 @@ export default class Jump {
             isTouchingWall &&
             !this.isWallJumping
         ) { //執行
-            console.log('Jump.js 設定前 playerStatus:', this.playerStatus);
+            // console.log('Jump.js 設定前 playerStatus:', this.playerStatus);
 
             if (this.playerStatus) {
                 this.playerStatus.isWallJumpLocking = true;

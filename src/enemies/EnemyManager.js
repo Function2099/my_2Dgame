@@ -1,4 +1,12 @@
-import Enemy from "./Enemy.js";
+import EnemyBase from "./EnemyBase.js";
+import EnemyGround1 from "./enemytype/EnemyGround1.js";
+
+const enemyTypes = {
+    ground: EnemyGround1,
+    // 之後可以加更多：
+    // flying: EnemyFlying1,
+    // boss: EnemyBoss1,
+};
 
 export default class EnemyManager {
     constructor(scene) {
@@ -6,16 +14,17 @@ export default class EnemyManager {
         this.enemies = scene.physics.add.group();
     }
 
-    spawn(x, y) {
-        const enemy = new Enemy(this.scene, x, y);
+    spawn(x, y, type = 'ground') {
+        const EnemyClass = enemyTypes[type] || EnemyBase;
+        const enemy = new EnemyClass(this.scene, x, y);
         this.enemies.add(enemy);
         return enemy;
     }
 
-    update() {
-        this.enemies.getChildren().forEach(enemy => {
-            enemy.update();
-        });
+
+    update(playerStatus) {
+        if (!this.scene.isGameActive) return;
+        this.enemies.getChildren().forEach(enemy => enemy.update(playerStatus));
     }
 
     getGroup() {

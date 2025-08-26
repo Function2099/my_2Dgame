@@ -1,0 +1,140 @@
+import EnemyBase from "../EnemyBase.js";
+
+export default class EnemyGround1 extends EnemyBase {
+    constructor(scene, x, y) {
+        super(scene, x, y, 'enemy');
+
+        this.setDisplaySize(36, 50);
+
+        this.isHit = false;
+
+        this.detectionRange = 250;
+        this.attackCooldown = 2000;
+        this.lastAttackTime = 0;
+        this.speed = 50;
+        this.chaseSpeed = 80;
+        this.direction = 1; // 1 = 右, -1 = 左
+
+        this.attackBox = this.scene.add.zone(this.x, this.y, 28, 40);
+        this.scene.physics.add.existing(this.attackBox);
+        this.attackBox.body.setAllowGravity(false);
+        this.attackBox.body.setImmovable(true);
+        this.attackBox.body.setEnable(true);
+
+        this.lastContactTime = 0;
+        this.contactDamageCooldown = 500;
+    }
+
+    update(playerStatus) {
+        if (this.isHit) return;
+
+        const player = playerStatus.player;
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        const offsetX = this.flipX ? -30 : 30;
+        const now = this.scene.time.now;
+        const touching = this.scene.physics.overlap(this, playerStatus.player);
+        this.attackBox.x = this.x + offsetX;
+        this.attackBox.y = this.y;
+
+        if (distance < this.detectionRange) {
+            this.state = 'chase';
+            this.chasePlayer(player);
+        } else {
+            this.state = 'patrol';
+            this.patrol();
+        }
+
+        // 攻擊判定
+        if (this.scene.time.now - this.lastAttackTime > this.attackCooldown) {
+            const hit = this.scene.physics.overlap(this.attackBox, playerStatus.player);
+            const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
+
+            if (hit && isFacingPlayer) {
+                this.attack(playerStatus);
+                this.lastAttackTime = this.scene.time.now;
+            }
+        }
+
+        // 碰撞判定
+        if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
+            playerStatus.takeHit(this.x);
+            this.lastContactTime = now;
+        }
+    }
+
+    chasePlayer(player) {
+        const dir = player.x < this.x ? -1 : 1;
+        const distance = Math.abs(player.x - this.x);
+        const speedBoost = Phaser.Math.Clamp(distance * 0.1, 0, 40); // 最多加速 40px/s
+        this.setVelocityX((this.chaseSpeed + speedBoost) * dir);
+        this.flipX = dir < 0;
+    }
+
+    patrol() {
+        this.setVelocityX(this.speed * this.direction);
+        this.flipX = this.direction < 0;
+
+        if (!this.hasGroundAhead()) {
+            this.direction *= -1;
+            this.flipX = this.direction < 0;
+        }
+    }
+
+    hasGroundAhead() {
+        const aheadX = this.x + this.direction * 20;
+        const aheadY = this.y + this.height / 2 + 2; // 更準確地偵測腳下
+        const sensor = new Phaser.Geom.Rectangle(aheadX, aheadY, 2, 2);
+
+        const platforms = this.scene.platformManager.getGroup().getChildren();
+
+        return platforms.some(platform =>
+            Phaser.Geom.Intersects.RectangleToRectangle(sensor, platform.getBounds())
+        );
+    }
+
+    attack(playerStatus) {
+        console.log('玩家被敵人攻擊命中');
+        this.showAttackBox();
+        playerStatus.takeHit(this.x);
+    }
+
+    showAttackBox() {
+        const g = this.scene.add.graphics();
+        g.lineStyle(2, 0xff0000, 1);
+        g.strokeRect(
+            this.attackBox.x - this.attackBox.width / 2,
+            this.attackBox.y - this.attackBox.height / 2,
+            this.attackBox.width,
+            this.attackBox.height
+        );
+        this.scene.time.delayedCall(200, () => g.destroy());
+    }
+
+    takeHit(attackerX, direction) {
+        this.hitCount++;
+        this.isHit = true;
+
+        if (direction === 'down') {
+            // console.log('下批命中：敵人不後退');
+            this.scene.time.delayedCall(200, () => {
+                this.isHit = false;
+            });
+            if (this.hitCount >= 3) {
+                this.destroy();
+            }
+            return;
+        }
+
+        const dir = this.x < attackerX ? -1 : 1;
+        const distance = Math.abs(this.x - attackerX);
+        const knockback = Phaser.Math.Clamp(distance * 2, 300, 800);
+        this.setVelocityX(knockback * dir);
+        this.scene.time.delayedCall(200, () => {
+            this.isHit = false;
+        });
+
+        if (this.hitCount >= 3) {
+            this.destroy();
+        }
+    }
+}

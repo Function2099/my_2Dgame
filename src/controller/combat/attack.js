@@ -1,13 +1,18 @@
+import AttackConfig from "./AttackConfig.js";
+
 export default class Attack {
-    constructor(scene, player, input, enemyGroup, playerStatus) {
+    constructor(scene, player, input, enemyGroup, playerStatus, platformGroup) {
         this.scene = scene
         this.player = player
         this.input = input
         this.enemyGroup = enemyGroup; //攻擊敵人用的
         this.playerStatus = playerStatus;
+        this.platformGroup = platformGroup;
 
         // 攻擊冷卻
-        this.attackCooldown = 300;
+        this.attackCooldown = AttackConfig.cooldown;
+
+        this.attackDuration = AttackConfig.duration;
         // 攻擊時間紀錄
         this.lastAttackTime = 0;
 
@@ -17,7 +22,7 @@ export default class Attack {
 
     createHitboxes() {
         this.hitboxes = {
-            forward: this.scene.add.rectangle(0, 0, 60, 60, 0xff0000, 0).setOrigin(0.5),
+            forward: this.scene.add.rectangle(0, 0, 100, 60, 0xff0000, 0).setOrigin(0.5),
             up: this.scene.add.rectangle(0, 0, 60, 60, 0x00ff00, 0).setOrigin(0.5),
             down: this.scene.add.rectangle(0, 0, 60, 50, 0x0000ff, 0).setOrigin(0.5),
             forwardLeft: this.scene.add.rectangle(0, 0, 60, 60, 0xffaaaa, 0).setOrigin(0.5),
@@ -32,16 +37,14 @@ export default class Attack {
             hitbox.body.immovable = true; //不被推動
 
             // 根據方向設定不同碰撞範圍
-            switch (dir) {
-                case 'forward': hitbox.body.setSize(60, 60); break;
-                case 'up': hitbox.body.setSize(60, 60); break;
-                case 'down': hitbox.body.setSize(60, 50); break;
+            const cfg = AttackConfig.hitboxes[dir];
+            if (cfg) {
+                hitbox.body.setSize(cfg.width, cfg.height);
+                hitbox.body.setOffset(
+                    hitbox.width / 2 - cfg.width / 2,
+                    hitbox.height / 2 - cfg.height / 2
+                );
             }
-
-            hitbox.body.setOffset(
-                hitbox.width / 2 - hitbox.body.width / 2,
-                hitbox.height / 2 - hitbox.body.height / 2
-            );
 
             hitbox.setPosition(-9999, -9999);
         });
@@ -126,31 +129,44 @@ export default class Attack {
 
         this.activeHitboxDirection = direction;
         this.attackStartTime = this.scene.time.now;
-        this.attackDuration = 150;
 
         this.scene.physics.overlap(
             hitbox,
             this.enemyGroup,
             (hb, enemy) => {
-                if (!hb._hitThisAttack) {
-                    enemy.takeHit();
-                    hb._hitThisAttack = true;
+                // debug用
+                // const graphics = this.scene.add.graphics();
+                // graphics.lineStyle(2, 0xff0000, 1);
+                // graphics.strokeRect(
+                //     Math.min(hb.x, enemy.x),
+                //     Math.min(hb.y, enemy.y),
+                //     Math.abs(hb.x - enemy.x),
+                //     Math.abs(hb.y - enemy.y)
+                // );
 
-                    if (
-                        this.activeHitboxDirection === 'down' &&
-                        !this.player.body.onFloor() // 角色不在地面
-                    ) {
-                        this.player.setVelocityY(-400); // 彈起速度，可微調
-                        this.playerStatus.resetAirAbilities();
-                    }
+                if (hb._hitThisAttack) return;
+                const line = new Phaser.Geom.Line(hb.x, hb.y, enemy.x, enemy.y);
+
+                // 判斷是否被平台遮擋
+                const blocked = this.platformGroup.getChildren().some(platform =>
+                    Phaser.Geom.Intersects.LineToRectangle(line, platform.body)
+                );
+
+                if (blocked) return; // 被平台擋住，攻擊無效
+
+                // 沒被擋住 → 正常攻擊
+                enemy.takeHit(this.player.x, this.activeHitboxDirection);
+                hb._hitThisAttack = true;
+
+                if (
+                    this.activeHitboxDirection === 'down' &&
+                    !this.player.body.onFloor()
+                ) {
+                    this.player.setVelocityY(-400);
+                    this.playerStatus.resetAirAbilities();
                 }
             }
         );
-
-        console.log('攻擊方向:', this.getAttackDirection());
-        console.log('鎖定中:', this.playerStatus.isWallJumpLocking, '方向:', this.playerStatus.wallJumpLockDirection);
-        console.log('牆跳方向:', this.playerStatus.wallJumpDirection);
-        console.log('justWallJumped:', this.playerStatus.justWallJumped);
     }
 
     getAttackDirection() {
@@ -178,18 +194,23 @@ export default class Attack {
         const speedComp = Math.min(Math.abs(velocityX) * 0.1, 20); // 最多補 20px
         const speedCompY = Math.min(Math.abs(velocityY) * 0.1, 20);
 
-        switch (direction) {
-            case 'up':
-                return { x: velocityX * 0.05, y: -30 - speedCompY };
-            case 'down':
-                return { x: velocityX * 0.05, y: 30 + speedCompY };
-            case 'forward':
-                return { x: facing * (30 + speedComp), y: 0 };
-            case 'forwardLeft':
-                return { x: -30, y: 0 };
-            case 'forwardRight':
-                return { x: 30, y: 0 };
-        }
-    }
+        const cfg = AttackConfig.hitboxes[direction];
+        if (!cfg) return { x: 0, y: 0 };
 
+        let x = cfg.offsetX;
+        let y = cfg.offsetY;
+
+        // 根據方向加速度補償
+        if (direction === 'forward') {
+            x = facing * (cfg.offsetX + speedComp);
+        } else if (direction === 'up') {
+            x += velocityX * 0.05;
+            y -= speedCompY;
+        } else if (direction === 'down') {
+            x += velocityX * 0.05;
+            y += speedCompY;
+        }
+
+        return { x, y };
+    }
 }

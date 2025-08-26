@@ -46,22 +46,18 @@ export class GameScene extends Phaser.Scene {
         this.player.setTint(0xff0000); // 紅色標記
         this.player.setCollideWorldBounds(true);
 
-        // // 生成敵人群組（靜態）
-        // this.enemies = this.physics.add.staticGroup();
-        // this.enemyGroup = this.enemies;
-
         // 平台管理
         this.platformManager = new PlatformManager(this);
         this.platformManager.createPlatforms();
-        
+
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
-        this.enemyManager.spawn(500, 300);
-        this.enemyManager.spawn(800, 300);
-        this.enemyManager.spawn(1200, 400);
-        
+        this.enemyManager.spawn(500, 300, 'ground');
+        this.enemyManager.spawn(800, 300, 'ground');
+        this.enemyManager.spawn(1200, 400, 'ground');
+
         this.enemyGroup = this.enemyManager.getGroup();
-        
+
         this.physics.add.collider(this.enemyGroup, this.platformManager.getGroup());
 
         // 設定地圖大小
@@ -79,7 +75,7 @@ export class GameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // 玩家控制邏輯
-        this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup);
+        this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup, this.platformManager);
 
         this.physics.world.drawDebug = false;
         this.physics.world.debugGraphic.clear();
@@ -92,5 +88,6 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (!this.isGameActive) return;
         this.playerController.update();
+        this.enemyManager.update(this.playerController.status);
     }
 }
