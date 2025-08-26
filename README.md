@@ -12,9 +12,25 @@
 
 ## 📁 資料夾結構
 
-- `docs/`：網頁 UI 與相關互動與控制功能
-- `scenes/`:遊戲場景
-- `utils/`：外接模塊
+```
+MY_2DGAME/
+├── .vscode/                       # VS Code 設定
+├── assets/                        # 遊戲資產（角色、特效、UI）
+│   ├── ember/
+│   ├── fx_explosion/
+│   └── ui_buttons/
+├── docs/                          # 測試頁與樣式檔案
+├── src/                           # 遊戲主程式碼
+│   ├── controller/
+│   ├── scenes/
+│   └── ui/
+├── utils/                         # 遊戲工具模組
+├── .gitignore
+├── CHANGELOG.md
+├── README.md
+└── VERSION
+
+```
 
 ## 🚀 執行方式
 
