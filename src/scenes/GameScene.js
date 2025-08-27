@@ -2,6 +2,7 @@ import PlayerController from "../controller/PlayerController.js"
 import PauseMenu from "../ui/PauseMenu.js";
 import EnemyManager from "../enemies/EnemyManager.js";
 import PlatformManager from "../platforms/PlatformManager.js";
+import { registerEnemyAnimations } from '../animation/AnimationRegistry.js';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -43,26 +44,7 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log('創建遊戲場景...');
 
-        // esc暫停和回到主選單功能
-        this.pauseMenu = new PauseMenu(this);
-
-        const defineAnim = (key, texture, start, end, frameRate = 10, repeat = 0) => {
-            if (!this.anims.exists(key)) {
-                this.anims.create({
-                    key,
-                    frames: this.anims.generateFrameNumbers(texture, { start, end }),
-                    frameRate,
-                    repeat
-                });
-            }
-        };
-
-        defineAnim('mummy_idle', 'mummy_idle', 0, 3, 6, -1);
-        defineAnim('mummy_walk', 'mummy_walk', 0, 5, 10, -1);
-        defineAnim('mummy_attack', 'mummy_attack', 0, 5, 10, 0);
-        defineAnim('mummy_hurt', 'mummy_hurt', 0, 1, 10, 0);
-        defineAnim('mummy_death', 'mummy_death', 0, 5, 10, 0);
-
+        registerEnemyAnimations(this);
 
         // 玩家生成位置
         this.player = this.physics.add.sprite(400, 300, 'player');
@@ -106,9 +88,13 @@ export class GameScene extends Phaser.Scene {
         this.physics.world.drawDebug = false;
         this.physics.world.debugGraphic.clear();
 
+        // esc暫停和回到主選單功能
+        this.pauseMenu = new PauseMenu(this);
+        this.isGameActive = true;
+
         console.log('場景創建完成');
         console.log('動畫是否存在：', this.anims.exists('mummy_walk'));
-        this.isGameActive = true;
+
     }
 
     // 介面刷新相關(遊戲幀)

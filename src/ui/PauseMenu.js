@@ -21,7 +21,13 @@ export default class PauseMenu {
         }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
         this.resumeBtn = this.createButton(width / 2, 250, '繼續遊戲', () => this.resume());
-        this.menuBtn = this.createButton(width / 2, 320, '回主選單', () => this.scene.scene.start('MainMenuScene'));
+        this.menuBtn = this.createButton(width / 2, 320, '回主選單', () => {
+            this.scene.physics.world.resume();
+            this.scene.anims.resumeAll();
+
+            this.scene.scene.stop('GameScene'); // 停止整個場景
+            this.scene.scene.start('MainMenuScene'); // 切換到主選單
+        });
         this.settingsBtn = this.createButton(width / 2, 390, '設定', () => this.scene.scene.start('SettingsScene'));
 
         this.setVisible(false);
