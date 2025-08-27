@@ -27,7 +27,7 @@ export default class EnemyGround1 extends EnemyBase {
     }
 
     update(playerStatus) {
-        if (this.isHit) return;
+        if (this.isHit || this.state === 'dead') return;
 
         const player = playerStatus.player;
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
@@ -158,27 +158,40 @@ export default class EnemyGround1 extends EnemyBase {
         this.isHit = true;
         this.play('mummy_hurt', true);
 
+        const dir = this.x < attackerX ? -1 : 1;
+        const distance = Math.abs(this.x - attackerX);
+        const knockback = Phaser.Math.Clamp(distance * 2, 300, 800);
+
+        // 下批命中：不後退
         if (direction === 'down') {
-            // console.log('下批命中：敵人不後退');
             this.scene.time.delayedCall(200, () => {
                 this.isHit = false;
             });
+
             if (this.hitCount >= 3) {
-                this.destroy();
+                this.die({
+                    animation: 'mummy_death',
+                    delay: 0,
+                    disablePhysics: true
+                });
             }
             return;
         }
 
-        const dir = this.x < attackerX ? -1 : 1;
-        const distance = Math.abs(this.x - attackerX);
-        const knockback = Phaser.Math.Clamp(distance * 2, 300, 800);
+        // 一般命中：擊退
         this.setVelocityX(knockback * dir);
+
         this.scene.time.delayedCall(200, () => {
             this.isHit = false;
         });
 
         if (this.hitCount >= 3) {
-            this.destroy();
+            this.die({
+                animation: 'mummy_death',
+                knockback: knockback * dir * 0.6,
+                disablePhysics: true
+            });
         }
+
     }
 }

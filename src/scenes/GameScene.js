@@ -81,7 +81,10 @@ export class GameScene extends Phaser.Scene {
 
         this.enemyGroup = this.enemyManager.getGroup();
 
+        // 敵人與平台碰撞關係
         this.physics.add.collider(this.enemyGroup, this.platformManager.getGroup());
+        // 敵人之間的碰撞關係
+        this.physics.add.collider(this.enemyGroup, this.enemyGroup);
 
         // 設定地圖大小
         this.cameras.main.setBounds(0, 0, 2000, 1500);

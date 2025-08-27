@@ -43,12 +43,14 @@ export default class PauseMenu {
     pause() {
         this.scene.isGameActive = false;
         this.scene.physics.world.pause()
+        this.scene.anims.pauseAll();
         this.setVisible(true);
     }
 
     resume() {
         this.scene.isGameActive = true;
         this.scene.physics.world.resume()
+        this.scene.anims.resumeAll();
         this.setVisible(false);
     }
 

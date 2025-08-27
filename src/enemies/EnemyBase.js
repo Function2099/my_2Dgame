@@ -25,4 +25,31 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
             this.destroy(); // 或播放死亡動畫
         }
     }
+
+    die(config) {
+        if (!config || !config.animation) {
+            throw new Error('die() 必須提供 animation 屬性');
+        }
+
+        if (this.state === 'dead') return;
+        this.state = 'dead';
+        this.isHit = true;
+
+        // ✅ 撥放死亡動畫（立即）
+        this.play(config.animation);
+
+        // ✅ 不要馬上關掉 physics，讓彈飛能發生
+        if (config.knockback) {
+            this.setVelocityX(config.knockback);
+        }
+
+        // ✅ 等動畫結束後再摧毀
+        this.once('animationcomplete', () => {
+            if (config.disablePhysics) {
+                this.body.enable = false;
+                this.attackBox?.body?.enable && (this.attackBox.body.enable = false);
+            }
+            this.destroy();
+        });
+    }
 }
