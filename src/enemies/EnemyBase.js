@@ -6,6 +6,7 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
 
         this.setOrigin(0.5);
         this.setCollideWorldBounds(true); // 防止掉出世界
+        this.body.onWorldBounds = true;
         this.body.setBounce(0);           // 不彈跳
         this.body.setGravityY(0);         // 可選：用全局重力即可
         this.body.setImmovable(false);    // 被重力影響

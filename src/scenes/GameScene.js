@@ -38,6 +38,13 @@ export class GameScene extends Phaser.Scene {
         enemyGfx.fillRect(0, 0, 40, 60);
         enemyGfx.generateTexture('enemy', 40, 60);
         enemyGfx.destroy();
+
+        // 子彈
+        const bulletGfx = this.add.graphics();
+        bulletGfx.fillStyle(0xffcc00, 1);
+        bulletGfx.fillRect(0, 0, 12, 6);
+        bulletGfx.generateTexture('enemyBullet', 12, 6);
+        bulletGfx.destroy();
     }
 
     // 測試
@@ -57,11 +64,20 @@ export class GameScene extends Phaser.Scene {
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
-        this.enemyManager.spawn(500, 300, 'ground');
         this.enemyManager.spawn(800, 300, 'ground');
         this.enemyManager.spawn(1200, 400, 'ground');
+        this.enemyManager.spawn(600, 200, 'flying');
 
         this.enemyGroup = this.enemyManager.getGroup();
+
+        this.physics.world.on('worldbounds', (body) => {
+            const enemy = body.gameObject;
+            if (enemy && enemy instanceof EnemyBase) {
+                if (enemy.escapeDirection !== undefined) {
+                    enemy.escapeDirection *= -1;
+                }
+            }
+        });
 
         // 敵人與平台碰撞關係
         this.physics.add.collider(this.enemyGroup, this.platformManager.getGroup());

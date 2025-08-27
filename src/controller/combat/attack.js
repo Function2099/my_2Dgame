@@ -139,15 +139,6 @@ export default class Attack {
             hitbox,
             this.enemyGroup,
             (hb, enemy) => {
-                // debug用
-                // const graphics = this.scene.add.graphics();
-                // graphics.lineStyle(2, 0xff0000, 1);
-                // graphics.strokeRect(
-                //     Math.min(hb.x, enemy.x),
-                //     Math.min(hb.y, enemy.y),
-                //     Math.abs(hb.x - enemy.x),
-                //     Math.abs(hb.y - enemy.y)
-                // );
 
                 const line = new Phaser.Geom.Line(hb.x, hb.y, enemy.x, enemy.y);
 

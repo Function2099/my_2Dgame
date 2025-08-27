@@ -1,8 +1,10 @@
 import EnemyBase from "./EnemyBase.js";
 import EnemyGround1 from "./enemytype/EnemyGround1.js";
+import EnemyFlying1 from "./enemytype/EnemyFlying1.js";
 
 const enemyTypes = {
     ground: EnemyGround1,
+    flying: EnemyFlying1,
     // 之後可以加更多：
     // flying: EnemyFlying1,
     // boss: EnemyBoss1,
@@ -18,6 +20,7 @@ export default class EnemyManager {
         const EnemyClass = enemyTypes[type] || EnemyBase;
         const enemy = new EnemyClass(this.scene, x, y);
         this.enemies.add(enemy);
+        console.log(`生成敵人類型：${type}`, EnemyClass.name);
         return enemy;
     }
 

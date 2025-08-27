@@ -1,7 +1,7 @@
 import Dash from "./Dash.js";
 import Jump from "./Jump.js";
 import PlayerStatus from "./PlayerStatus.js";
-import Attack from "./combat/Attack.js";
+import Attack from "./combat/attack.js";
 
 export default class PlayerController {
     constructor(scene, player, cursors, enemyGroup, platformManager) {

@@ -7,13 +7,36 @@
     <title>遊戲測試用</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
+        html,
         body {
             margin: 0;
-            overflow: hidden;
+            padding: 0;
+            height: 100%;
+            overflow: auto;
+            /* ✅ 允許滾動 */
         }
 
         canvas {
             display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #game-section {
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding-bottom: 100px;
+            /* ✅ 給底部 UI 留空間 */
+        }
+
+        .placeholder {
+            height: 200px;
+            /* ✅ 模擬底部 UI 或空間 */
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            line-height: 200px;
+            font-size: 20px;
         }
     </style>
     <link rel="stylesheet" href="style_body.css" />
