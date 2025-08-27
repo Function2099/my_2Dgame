@@ -102,30 +102,44 @@ export default class EnemyGround1 extends EnemyBase {
         );
     }
 
-attack(playerStatus) {
-    this.state = 'attack';
-    this.attackFrameTriggered = false;
-    this.play('mummy_attack');
+    attack(playerStatus) {
+        this.state = 'attack';
+        this.setVelocityX(0);
+        this.attackFrameTriggered = false;
+        this.play('mummy_attack');
 
-    const totalFrames = this.anims.currentAnim?.frames.length || 4; // 預設4幀
-    const lastFrameIndex = totalFrames - 1;
+        const totalFrames = this.anims.currentAnim?.frames.length || 4; // 預設4幀
+        const lastFrameIndex = totalFrames - 1;
 
-    this.on('animationupdate', (anim, frame) => {
-        if (anim.key === 'mummy_attack' && frame.index === lastFrameIndex && !this.attackFrameTriggered) {
-            this.attackFrameTriggered = true;
-            console.log('玩家被敵人攻擊命中');
-            this.showAttackBox();
-            playerStatus.takeHit(this.x);
-        }
-    });
+        this.on('animationupdate', (anim, frame) => {
+            if (anim.key === 'mummy_attack' && frame.index === lastFrameIndex && !this.attackFrameTriggered) {
+                this.attackFrameTriggered = true;
 
-    this.once('animationcomplete', () => {
-        this.off('animationupdate');
-        const player = playerStatus.player;
-        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
-        this.state = distance < this.detectionRange ? 'chase' : 'patrol';
-    });
-}
+                const player = playerStatus.player;
+                const offsetX = this.flipX ? -30 : 30;
+                this.attackBox.x = this.x + offsetX;
+                this.attackBox.y = this.y;
+
+                const hit = this.scene.physics.overlap(this.attackBox, player);
+                const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
+
+                if (hit && isFacingPlayer) {
+                    console.log('玩家被敵人攻擊命中');
+                    this.showAttackBox();
+                    playerStatus.takeHit(this.x);
+                } else {
+                    console.log('攻擊失敗：玩家已脫離範圍');
+                }
+            }
+        });
+
+        this.once('animationcomplete', () => {
+            this.off('animationupdate');
+            const player = playerStatus.player;
+            const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+            this.state = distance < this.detectionRange ? 'chase' : 'patrol';
+        });
+    }
 
     showAttackBox() {
         const g = this.scene.add.graphics();
