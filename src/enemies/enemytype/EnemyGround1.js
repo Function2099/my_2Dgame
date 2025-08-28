@@ -48,6 +48,9 @@ export default class EnemyGround1 extends EnemyBase {
             this.patrol();
         }
 
+        // 世界邊界
+        this.enforceWorldBounds();
+
         // 攻擊判定
         if (this.scene.time.now - this.lastAttackTime > this.attackCooldown) {
             const hit = this.scene.physics.overlap(this.attackBox, playerStatus.player);

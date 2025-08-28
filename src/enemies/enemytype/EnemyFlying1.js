@@ -6,16 +6,16 @@ export default class EnemyFlying1 extends EnemyBase {
         this.setOrigin(0.5);
         this.setDisplaySize(40, 28);
 
-        this.speed = 100;
         this.setVelocity(0, 0);
         this.originalY = y;
 
-        this.detectionRange = 300;
+        this.detectionRange = 280;
         this.EscapeDistance = 100;
-        this.escapeSpeed = 200;
+        this.escapeSpeed = 150;
         this.escapeDuration = 1000;
         this.escapeCooldown = 4500;
         this._forcedEscapeUntil = 0;
+        this._forceRiseUntil = 0;
         this.body.allowGravity = false; // 關閉重力影響
         this.scene.physics.world.drawDebug = true;
         this.escapeDirection = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
@@ -45,8 +45,6 @@ export default class EnemyFlying1 extends EnemyBase {
         let blockedAbove = false;
         let velocityX = 0;
         let velocityY = 0;
-
-
 
         if (!this.isHit) {
             this.setVelocityX(velocityX);
@@ -125,28 +123,6 @@ export default class EnemyFlying1 extends EnemyBase {
 
             this.scene.time.delayedCall(6000, () => bullet.destroy());
 
-        }
-    }
-
-    // 避免離開世界邊框
-    enforceWorldBounds() {
-        const bounds = this.scene.physics.world.bounds;
-        const margin = 20;
-
-        if (this.x < bounds.x + margin) {
-            this.setX(bounds.x + margin);
-            this.escapeDirection = 1;
-        }
-        if (this.x > bounds.width - margin) {
-            this.setX(bounds.width - margin);
-            this.escapeDirection = -1;
-        }
-
-        if (this.y < bounds.y + margin) {
-            this.setY(bounds.y + margin);
-        }
-        if (this.y > bounds.height - margin) {
-            this.setY(bounds.height - margin);
         }
     }
 
@@ -236,7 +212,7 @@ export default class EnemyFlying1 extends EnemyBase {
             const dy = targetY - this.y;
             const angle = Math.atan2(dy, dx);
 
-            const patrolSpeed = 40; // ✅ 控制巡邏速度
+            const patrolSpeed = 40; // 巡邏速度
             this.setVelocity(Math.cos(angle) * patrolSpeed, Math.sin(angle) * patrolSpeed);
 
             if (distance < this.detectionRange) {
@@ -250,13 +226,51 @@ export default class EnemyFlying1 extends EnemyBase {
             const deltaX = player.x - this.x;
             const dirX = deltaX > 0 ? 1 : -1;
 
+            const deltaY = player.y - this.y;
+            let vy = null;
+
+            // 玩家高度接近時強制上升
+            if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) {
+                this._forceRiseUntil = now + 1000;
+                vy = -50;
+            }
+
+            // 碰到平台底部時強制上升
+            const platforms = this.scene.platformManager.getGroup().getChildren();
+            for (const platform of platforms) {
+                const bounds = platform.getBounds();
+                const isHorizontallyAligned = Math.abs(platform.x - this.x) < bounds.width / 2;
+
+                const verticalGap = bounds.y - (this.y + this.displayHeight / 2);
+                const isTouchingBottom = verticalGap < 20;
+
+                if (isHorizontallyAligned && isTouchingBottom && now > this._forceRiseUntil) {
+                    this._forceRiseUntil = now + 1000;
+                    vy = -150; // 更強的抬升力
+                    break;
+                }
+            }
+
+            // 如果正在強制上升期間，維持上升速度
+            if (now < this._forceRiseUntil && vy === null) {
+                vy = -50;
+            }
+
+            // 否則使用追蹤邏輯
+            if (vy === null) {
+                vy = Phaser.Math.Clamp(deltaY * 0.3, -100, 100);
+            }
+
+            this.setVelocityY(vy);
+
+
             if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
                 this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-                this._engageForceUntil = now + 1500; // ✅ 鎖定方向 1.5 秒
+                this._engageForceUntil = now + 1500; // 鎖定方向 1.5 秒
             }
 
             if (now < this._engageForceUntil) {
-                this.setVelocityX(this._engageForceDir * 60);
+                this.setVelocityX(this._engageForceDir * 100);
             } else if (distance > 100) {
                 this.setVelocityX(dirX * 60);
             }
@@ -270,7 +284,7 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
             if (distance < this.detectionRange) {
-                this._lostSightTime = now; // ✅ 玩家仍在偵測範圍
+                this._lostSightTime = now; // 玩家仍在偵測範圍
             }
 
             if (now - this._lostSightTime > 5000) {
@@ -286,21 +300,27 @@ export default class EnemyFlying1 extends EnemyBase {
             const dirY = deltaY > 0 ? -1 : 1;
             const vy = dirY * 80;
 
+            const deltaX = player.x - this.x;
+            const absDeltaX = Math.abs(deltaX);
+
             let vx = this._lockedDir * this.escapeSpeed;
 
-            const deltaX = Math.abs(player.x - this.x);
-
-            // ✅ 若 X 軸距離太小，觸發強制逃離方向鎖定
-            if (deltaX < 30 && now > this._forcedEscapeUntil) {
+            // 若 X 軸距離太小，觸發強制逃離方向鎖定
+            if (absDeltaX < 30 && now > this._forcedEscapeUntil) {
                 this._lockedDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
                 this._forcedEscapeUntil = now + 1000;
                 vx = this._lockedDir * this.escapeSpeed;
             }
 
+            // 延伸逃離期：冷卻結束但玩家仍在範圍內
+            if (now > this._lockedDirUntil && absDeltaX < this.EscapeDistance) {
+                vx = this._lockedDir * 100; // 遠離
+            }
+
             this.setVelocity(vx, vy);
 
-            // ✅ 結束逃離狀態（不受強制鎖定影響）
-            if (now > this._lockedDirUntil) {
+            // 結束逃離狀態（玩家已脫離範圍）
+            if (now > this._lockedDirUntil && absDeltaX >= this.EscapeDistance) {
                 this._movementState = 'engage';
             }
 

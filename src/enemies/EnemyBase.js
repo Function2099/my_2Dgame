@@ -19,6 +19,28 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
 
     }
 
+    // 避免離開世界邊框
+    enforceWorldBounds() {
+        const bounds = this.scene.physics.world.bounds;
+        const margin = 20;
+
+        if (this.x < bounds.x + margin) {
+            this.setX(bounds.x + margin);
+            this.escapeDirection = 1;
+        }
+        if (this.x > bounds.width - margin) {
+            this.setX(bounds.width - margin);
+            this.escapeDirection = -1;
+        }
+
+        if (this.y < bounds.y + margin) {
+            this.setY(bounds.y + margin);
+        }
+        if (this.y > bounds.height - margin) {
+            this.setY(bounds.height - margin);
+        }
+    }
+
     takeHit() {
         this.hitCount++;
         console.log(`Enemy 被打第 ${this.hitCount} 次`);
