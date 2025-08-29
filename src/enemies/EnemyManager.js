@@ -21,6 +21,7 @@ export default class EnemyManager {
         const enemy = new EnemyClass(this.scene, x, y);
         this.enemies.add(enemy);
         console.log(`生成敵人類型：${type}`, EnemyClass.name);
+        console.log('建立敵人:', enemy.x, enemy.y, enemy.active, enemy.visible);
         return enemy;
     }
 
