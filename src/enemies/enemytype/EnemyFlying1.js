@@ -3,36 +3,53 @@ import EnemyBase from '../EnemyBase.js';
 export default class EnemyFlying1 extends EnemyBase {
     constructor(scene, x, y) {
         super(scene, x, y, 'enemy'); // 可替換為飛行敵人貼圖
+
+        // === 外觀與物理設定 ===
         this.setOrigin(0.5);
         this.setDisplaySize(40, 28);
-
         this.setVelocity(0, 0);
+        this.body.allowGravity = false;
         this.originalY = y;
+        this._origin = { x, y };
 
+        // === 移動參數 ===
         this.detectionRange = 280;
         this.EscapeDistance = 100;
         this.escapeSpeed = 150;
         this.escapeDuration = 1000;
         this.escapeCooldown = 4500;
+        this.returnDelay = 5000;
+
+        // === 行為狀態 ===
+        this._movementState = 'patrol';
+
+        this._returning = false;
+
+        // === 巡邏行為 ===
+        this.patrolSpeed = 40;              // 巡邏移動速度
+        this.patrolRadius = 50;             // 巡邏圓半徑
+        this._patrolAngle = 0.02;       // 巡邏角度遞增速度
+
+        // === 時間戳管理 ===
+        this._escapeCooldownUntil = 0;
+        this._lockedDirUntil = 0;
+        this._lockedDir = 0;
         this._forcedEscapeUntil = 0;
         this._forceRiseUntil = 0;
-        this.body.allowGravity = false; // 關閉重力影響
-        this.scene.physics.world.drawDebug = true;
+        this._lostSightTime = 0;
+        this._engageForceUntil = 0;
+
+        // === 行為方向 ===
+        this._engageForceDir = 0;
         this.escapeDirection = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
 
+        // === 攻擊與碰撞 ===
         this.lastShotTime = 0;
-        this.shootCooldown = 2500; // 射擊冷卻
-
+        this.shootCooldown = 2500;
         this.lastContactTime = 0;
         this.contactDamageCooldown = 500;
 
-        this._lostSightTime = 0;
-        this.returnDelay = 5000;
-
-        this._engageForceDir = 0;
-        this._engageForceUntil = 0;
-
-        // 將偵測範圍可視化
+        // === 偵測範圍可視化 ===
         this.debugCircle = this.scene.add.graphics();
         this.debugCircle.setDepth(1);
     }
@@ -133,10 +150,10 @@ export default class EnemyFlying1 extends EnemyBase {
 
         const dir = this.x < attackerX ? -1 : 1;
         const distance = Math.abs(this.x - attackerX);
-        const knockback = Phaser.Math.Clamp(distance * 2, 300, 800);
+        const knockback = Phaser.Math.Clamp(distance * 2, 400, 1000);
         // 下批命中：向-Y軸移動
         if (direction === 'down') {
-            this.setVelocity(0, 250);
+            this.setVelocity(0, 400);
             this.scene.time.delayedCall(200, () => {
                 this.isHit = false;
             });
@@ -170,7 +187,7 @@ export default class EnemyFlying1 extends EnemyBase {
 
         // 一般命中：擊退
         this.setVelocityX(knockback * dir);
-        this.setVelocity(knockback * dir, -200);
+        this.setVelocity(knockback * dir, -300);
 
         this.scene.time.delayedCall(200, () => {
             this.isHit = false;
@@ -191,28 +208,14 @@ export default class EnemyFlying1 extends EnemyBase {
         const now = this.scene.time.now;
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
-        // 初始化狀態
-        if (!this._movementState) {
-            this._movementState = 'patrol';
-            this._patrolAngle = 0;
-            this._escapeCooldownUntil = 0;
-            this._lockedDirUntil = 0;
-            this._lockedDir = 0;
-            this._returning = false;
-            this._origin = { x: this.x, y: this.y };
-        }
-
         if (this._movementState === 'patrol') {
-            this._patrolAngle += 0.02; //
-            const radius = 50;
-            const targetX = this._origin.x + Math.cos(this._patrolAngle) * radius;
-            const targetY = this._origin.y + Math.sin(this._patrolAngle) * radius;
+            const targetX = this._origin.x + Math.cos(this._patrolAngle) * patrolRadius;
+            const targetY = this._origin.y + Math.sin(this._patrolAngle) * patrolRadius;
 
             const dx = targetX - this.x;
             const dy = targetY - this.y;
             const angle = Math.atan2(dy, dx);
 
-            const patrolSpeed = 40; // 巡邏速度
             this.setVelocity(Math.cos(angle) * patrolSpeed, Math.sin(angle) * patrolSpeed);
 
             if (distance < this.detectionRange) {
@@ -231,8 +234,8 @@ export default class EnemyFlying1 extends EnemyBase {
 
             // 玩家高度接近時強制上升
             if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) {
-                this._forceRiseUntil = now + 1000;
-                vy = -50;
+                this._forceRiseUntil = now + 1800;
+                vy = -42;
             }
 
             // 碰到平台底部時強制上升
@@ -245,8 +248,8 @@ export default class EnemyFlying1 extends EnemyBase {
                 const isTouchingBottom = verticalGap < 20;
 
                 if (isHorizontallyAligned && isTouchingBottom && now > this._forceRiseUntil) {
-                    this._forceRiseUntil = now + 1000;
-                    vy = -150; // 更強的抬升力
+                    this._forceRiseUntil = now + 1400;
+                    vy = -150; //抬升力
                     break;
                 }
             }
@@ -262,7 +265,6 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
             this.setVelocityY(vy);
-
 
             if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
                 this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
@@ -326,7 +328,6 @@ export default class EnemyFlying1 extends EnemyBase {
 
             return;
         }
-
 
         if (this._movementState === 'return') {
             const dx = this._origin.x - this.x;

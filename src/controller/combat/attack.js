@@ -21,32 +21,25 @@ export default class Attack {
     }
 
     createHitboxes() {
-        this.hitboxes = {
-            forward: this.scene.add.rectangle(0, 0, 100, 60, 0xff0000, 0).setOrigin(0.5),
-            up: this.scene.add.rectangle(0, 0, 60, 60, 0x00ff00, 0).setOrigin(0.5),
-            down: this.scene.add.rectangle(0, 0, 60, 50, 0x0000ff, 0).setOrigin(0.5),
-            forwardLeft: this.scene.add.rectangle(0, 0, 60, 60, 0xffaaaa, 0).setOrigin(0.5),
-            forwardRight: this.scene.add.rectangle(0, 0, 60, 60, 0xaaffaa, 0).setOrigin(0.5),
-        };
+        this.hitboxes = {};
 
-        Object.entries(this.hitboxes).forEach(([dir, hitbox]) => {
+        Object.entries(AttackConfig.hitboxes).forEach(([dir, cfg]) => {
+            const hitbox = this.scene.add.rectangle(0, 0, cfg.width, cfg.height, 0xffffff, 0).setOrigin(0.5);
             this.scene.physics.add.existing(hitbox);
+
+            hitbox.body.setSize(cfg.width, cfg.height);
+            hitbox.body.setOffset(
+                hitbox.width / 2 - cfg.width / 2,
+                hitbox.height / 2 - cfg.height / 2
+            );
+            hitbox.body.allowGravity = false;
+            hitbox.body.immovable = true;
+            hitbox.body.enable = false;
+
             hitbox.setVisible(false);
-            hitbox.body.enable = false; //初始禁用
-            hitbox.body.allowGravity = false; // 不受重力影響
-            hitbox.body.immovable = true; //不被推動
-
-            // 根據方向設定不同碰撞範圍
-            const cfg = AttackConfig.hitboxes[dir];
-            if (cfg) {
-                hitbox.body.setSize(cfg.width, cfg.height);
-                hitbox.body.setOffset(
-                    hitbox.width / 2 - cfg.width / 2,
-                    hitbox.height / 2 - cfg.height / 2
-                );
-            }
-
             hitbox.setPosition(-9999, -9999);
+
+            this.hitboxes[dir] = hitbox;
         });
     }
 
