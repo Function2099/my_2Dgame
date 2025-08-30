@@ -2,7 +2,8 @@ import PlayerController from "../controller/PlayerController.js"
 import PauseMenu from "../ui/PauseMenu.js";
 import EnemyManager from "../enemies/EnemyManager.js";
 import PlatformManager from "../platforms/PlatformManager.js";
-import { registerEnemyAnimations } from '../animation/AnimationRegistry.js';
+import { registerAnimations } from '../animation/AnimationRegistry.js';
+import { loadAssets } from "../animation/AssetLoader.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -12,11 +13,8 @@ export class GameScene extends Phaser.Scene {
 
     // 資源加載
     preload() {
-        this.load.spritesheet('mummy_idle', '../assets/enemies/Mummy_idle.png', { frameWidth: 48, frameHeight: 48 });
-        this.load.spritesheet('mummy_walk', '../assets/enemies/Mummy_walk.png', { frameWidth: 48, frameHeight: 48 });
-        this.load.spritesheet('mummy_attack', '../assets/enemies/Mummy_attack.png', { frameWidth: 48, frameHeight: 48 });
-        this.load.spritesheet('mummy_hurt', '../assets/enemies/Mummy_hurt.png', { frameWidth: 48, frameHeight: 48 });
-        this.load.spritesheet('mummy_death', '../assets/enemies/Mummy_death.png', { frameWidth: 48, frameHeight: 48 });
+        loadAssets(this);
+
         // 使用簡單幾何圖形代替精靈（暫時不用美術資源）
         // 玩家：紅色方塊
         const playerGfx = this.add.graphics();
@@ -51,11 +49,11 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log('創建遊戲場景...');
 
-        registerEnemyAnimations(this);
+        registerAnimations(this);
 
         // 玩家生成位置
-        this.player = this.physics.add.sprite(400, 300, 'player');
-        this.player.setTint(0xff0000); // 紅色標記
+        this.player = this.physics.add.sprite(400, 300, 'player_idle');
+        this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
         // 平台管理
@@ -64,9 +62,9 @@ export class GameScene extends Phaser.Scene {
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
-        this.enemyManager.spawn(800, 300, 'ground');
-        this.enemyManager.spawn(1200, 400, 'ground');
-        this.enemyManager.spawn(600, 200, 'flying');
+        // this.enemyManager.spawn(800, 300, 'ground');
+        // this.enemyManager.spawn(1200, 400, 'ground');
+        // this.enemyManager.spawn(600, 200, 'flying');
 
         this.enemyGroup = this.enemyManager.getGroup();
 

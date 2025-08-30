@@ -11,6 +11,14 @@ export default class PlayerController {
         this.enemyGroup = enemyGroup;
         this.platformManager = platformManager;
 
+        // 玩家大小
+        this.player.setSize(38, 132);
+        this.player.setDepth(10);
+        // this.player.setOrigin((0.714), 1);
+
+        // this.physics.world.drawDebug = true;
+        // this.physics.world.debugGraphic.clear();
+
         // 玩家狀態
         this.status = new PlayerStatus(player, scene);
         // 衝刺
@@ -39,6 +47,11 @@ export default class PlayerController {
         // 左右移動邏輯
         const now = this.status.now;
         const { isGrounded, isTouchingWall, isFalling, onWallLeft } = this.status;
+                if (this.player.flipX) {
+            this.player.setOffset(4, 0); // 翻轉時往左偏移
+        } else {
+            this.player.setOffset(40, 0); // 正常時往右偏移
+        }
 
         // 更新行為模組
         this.dash.update(now, isGrounded, isTouchingWall);
@@ -66,6 +79,30 @@ export default class PlayerController {
             }
         }
 
+        const currentAnim = this.player.anims.currentAnim?.key;
+        if (currentAnim !== 'player_idle') {
+            this.player.play('player_idle', true);
+        }
+
+        if (!this.debugGfx) {
+            this.debugGfx = this.scene.add.graphics();
+        }
+        this.debugGfx.clear();
+
+        this.debugGfx.lineStyle(2, 0xff00ff, 1); // 紫色框框
+        const bounds = this.player.getBounds();
+        this.debugGfx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        const body = this.player.body;
+
+        this.debugGfx.lineStyle(2, 0x00ffff, 1); // 藍色框框
+        this.debugGfx.strokeRect(body.x, body.y, body.width, body.height);
+
+
     }
+
+    updateHitboxOffset() {
+    const offsetX = this.player.flipX ? 4 : 40;
+    this.player.setOffset(offsetX, 0);
+}
 
 }
