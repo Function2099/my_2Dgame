@@ -26,8 +26,8 @@ export class GameScene extends Phaser.Scene {
         // 平台：棕色長條
         const platformGfx = this.add.graphics();
         platformGfx.fillStyle(0x8B4513, 1);
-        platformGfx.fillRect(0, 0, 100, 20);
-        platformGfx.generateTexture('platform', 100, 20);
+        platformGfx.fillRect(0, 0, 100, 40);
+        platformGfx.generateTexture('platform', 100, 40);
         platformGfx.destroy();
 
         // 敵人：藍色方塊
@@ -48,8 +48,16 @@ export class GameScene extends Phaser.Scene {
     // 測試
     create() {
         console.log('創建遊戲場景...');
+        console.log('Phaser version =', Phaser.VERSION);
+
 
         registerAnimations(this);
+
+        const sparkGfx = this.add.graphics();
+        sparkGfx.fillStyle(0xffffff, 1);
+        sparkGfx.fillCircle(10, 10, 10); // 半徑 4px 的白色圓形
+        sparkGfx.generateTexture('spark_white', 12, 12); // 產生 8x8 貼圖
+        sparkGfx.destroy();
 
         // 玩家生成位置
         this.player = this.physics.add.sprite(400, 300, 'player_idle');
@@ -99,7 +107,7 @@ export class GameScene extends Phaser.Scene {
         // 玩家控制邏輯
         this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup, this.platformManager);
 
-        this.physics.world.drawDebug = false;
+        this.physics.world.drawDebug = true;
         this.physics.world.debugGraphic.clear();
 
         // esc暫停和回到主選單功能

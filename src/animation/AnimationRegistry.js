@@ -13,7 +13,7 @@ export function registerAnimations(scene) {
 
     // 玩家動畫
     defineAnim('player_idle', 'player_idle', 0, 4, 6, -1);
-
+    defineAnim('player_walk', 'player_walk', 0, 3, 6, -1);
 
     // 地面敵人動畫
     defineAnim('mummy_idle', 'mummy_idle', 0, 3, 6, -1);

@@ -7,7 +7,7 @@ export default class PlatformManager {
   createPlatforms() {
     const layout = [
       { x: 400, y: 568, scaleX: 10 },
-      { x: 600, y: 400, scaleX: 3 },
+      { x: 600, y: 380, scaleX: 3 },
       { x: 200, y: 250, scaleX: 3 },
       { x: 1200, y: 500, scaleX: 3 },
       { x: 1800, y: 300, scaleX: 3 },

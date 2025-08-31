@@ -1,11 +1,11 @@
 const AttackConfig = {
-    cooldown: 300,
-    duration: 150,
+    cooldown: 400,
+    duration: 200,
     knockbackPower: 150,
     hitboxes: {
-        forward: { width: 84, height: 60, offsetX: 35, offsetY: 0 },
-        up: { width: 90, height: 60, offsetX: 0, offsetY: -30 },
-        down: { width: 90, height: 50, offsetX: 0, offsetY: 30 },
+        forward: { width: 145, height: 132, offsetX: 100, offsetY: 0 },
+        up: { width: 140, height: 82, offsetX: 20, offsetY: -80 },
+        down: { width: 140, height: 55, offsetX: 20, offsetY: 60 },
         forwardLeft: { width: 70, height: 60, offsetX: -30, offsetY: 0 },
         forwardRight: { width: 70, height: 60, offsetX: 30, offsetY: 0 },
     },

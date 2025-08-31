@@ -7,9 +7,29 @@ export function loadAssets(scene) {
     scene.load.spritesheet('mummy_hurt', '../assets/enemies/Mummy_hurt.png', { frameWidth: 48, frameHeight: 48 });
     scene.load.spritesheet('mummy_death', '../assets/enemies/Mummy_death.png', { frameWidth: 48, frameHeight: 48 });
 
-    // 玩家待機動畫 spritesheet（如果你已經準備好了）
+    // 玩家
     scene.load.spritesheet('player_idle', '../assets/player/player_idle.png', {
         frameWidth: 84,
         frameHeight: 132
+    });
+
+    scene.load.spritesheet('player_walk', '../assets/player/player_walk.png', {
+        frameWidth: 89,
+        frameHeight: 132
+    });
+
+    scene.load.spritesheet('player_jump', '../assets/player/player_jump.png', {
+        frameWidth: 98,
+        frameHeight: 132
+    });
+
+    scene.load.spritesheet('player_jump', '../assets/player/player_jump.png', {
+        frameWidth: 98,
+        frameHeight: 132
+    });
+
+    scene.load.spritesheet('player_air_attack', '../assets/player/player_air_attack.png', {
+        frameWidth: 87,
+        frameHeight: 134
     });
 }
