@@ -1,13 +1,13 @@
 # 我的 2D 橫向遊戲專案
 
-這是一款使用前端技術和Phaser所製作的 2D 橫向動作遊戲，支援瀏覽器執行
+這是一款使用JavaScript和Phaser遊戲框架所製作的 2D 橫向動作遊戲
 
 ## 🔧 技術架構
 
-- HTML5
-- CSS
 - JavaScript
 - Phaser
+- HTML5
+- CSS
 - VS Code 編輯
 
 ## 📁 資料夾結構
