@@ -15,8 +15,9 @@
 ```
 MY_2DGAME/
 ├── .vscode/                       # VS Code 設定
-├── assets/                        # 遊戲資產（角色、特效、UI）
-│   ├── ember/
+├── assets/                        # 遊戲資產（角色、敵人、特效、UI）
+│   ├── player/
+|   ├── enemies/
 │   ├── fx_explosion/
 │   └── ui_buttons/
 ├── docs/                          # 測試頁與樣式檔案
@@ -39,5 +40,4 @@ MY_2DGAME/
 3. 點擊開始遊玩，使用者可開始遊玩
 
 ## 📌 作者
-
-趙宇玄 @ 2025
+二函日 @ 2025
