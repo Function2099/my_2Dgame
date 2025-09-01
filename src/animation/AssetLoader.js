@@ -9,27 +9,22 @@ export function loadAssets(scene) {
 
     // 玩家
     scene.load.spritesheet('player_idle', '../assets/player/player_idle.png', {
-        frameWidth: 84,
-        frameHeight: 132
+        frameWidth: 98,
+        frameHeight: 134
     });
 
     scene.load.spritesheet('player_walk', '../assets/player/player_walk.png', {
-        frameWidth: 89,
-        frameHeight: 132
+        frameWidth: 98,
+        frameHeight: 134
     });
 
     scene.load.spritesheet('player_jump', '../assets/player/player_jump.png', {
         frameWidth: 98,
-        frameHeight: 132
-    });
-
-    scene.load.spritesheet('player_jump', '../assets/player/player_jump.png', {
-        frameWidth: 98,
-        frameHeight: 132
+        frameHeight: 134
     });
 
     scene.load.spritesheet('player_air_attack', '../assets/player/player_air_attack.png', {
-        frameWidth: 87,
+        frameWidth: 98,
         frameHeight: 134
     });
 }

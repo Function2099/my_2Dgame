@@ -17,11 +17,11 @@ export class GameScene extends Phaser.Scene {
 
         // 使用簡單幾何圖形代替精靈（暫時不用美術資源）
         // 玩家：紅色方塊
-        const playerGfx = this.add.graphics();
-        playerGfx.fillStyle(0xff0000, 1);
-        playerGfx.fillRect(0, 0, 40, 56);
-        playerGfx.generateTexture('player', 40, 56);
-        playerGfx.destroy();
+        // const playerGfx = this.add.graphics();
+        // playerGfx.fillStyle(0xff0000, 1);
+        // playerGfx.fillRect(0, 0, 40, 56);
+        // playerGfx.generateTexture('player', 40, 56);
+        // playerGfx.destroy();
 
         // 平台：棕色長條
         const platformGfx = this.add.graphics();
