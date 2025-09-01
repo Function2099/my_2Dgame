@@ -272,8 +272,8 @@ export default class EnemyFlying1 extends EnemyBase {
                 const isTouchingBottom = verticalGap < 20;
 
                 if (isHorizontallyAligned && isTouchingBottom && now > this._forceRiseUntil) {
-                    this._forceRiseUntil = now + 1400;
-                    vy = -150; //抬升力
+                    this._forceRiseUntil = now + 2000;
+                    vy = -60; //抬升力
                     break;
                 }
             }
