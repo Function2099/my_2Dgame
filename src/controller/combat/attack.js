@@ -1,4 +1,5 @@
 import AttackConfig from "./AttackConfig.js";
+import EffectManager from "./EffectManager.js";
 
 export default class Attack {
     constructor(scene, player, input, enemyGroup, playerStatus, platformGroup) {
@@ -15,28 +16,13 @@ export default class Attack {
         this.attackDuration = AttackConfig.duration;
         // 攻擊時間紀錄
         this.lastAttackTime = 0;
-
         this.isAirAttacking = false;
-
-        this.particles = this.scene.add.particles("spark_white");
 
         this.createHitboxes();
         this.bindInput();
 
-        // 可重複使用的粒子發射器（一次性爆裂，非持續噴發）
-        this.sparkEmitter = this.scene.add.particles(0, 0, 'spark_white', {
-            speed: { min: 100, max: 250 },
-            angle: { min: 0, max: 360 },
-            lifespan: { min: 200, max: 500 },
-            // explode() 會一次性噴發，所以這裡 quantity 設 0
-            quantity: 0,
-            scale: { start: 0.6, end: 0 },
-            alpha: { start: 1, end: 0 },
-            // 每顆隨機藍或白（用 onEmit 於 3.60+ 最穩）
-            tint: { onEmit: () => Phaser.Utils.Array.GetRandom([0x00aaff, 0xffffff]) },
-            blendMode: 'ADD',
-            emitting: false // 關閉「持續噴發」模式，改用 explode()
-        });
+        // 特效
+        this.effect = new EffectManager(scene);
     }
 
     createHitboxes() {
@@ -239,28 +225,5 @@ export default class Attack {
         }
         return { x, y };
     }
-
-    spawnParticles(x, y) {
-        this.sparkEmitter.setPosition(x, y);
-        // 一次性爆裂 N 顆（例如 12 顆）
-        this.sparkEmitter.explode(12);
-    }
-
-    spawnExplosionCircle(x, y, radius = 60) {
-        // 建立一個圓形圖形
-        const circle = this.scene.add.circle(x, y, radius, 0x00aaff, 0.4)
-            .setStrokeStyle(3, 0xffffff, 0.8); // 藍色填充 + 白邊
-
-        // 爆炸縮小的動畫 (0.2 秒)
-        this.scene.tweens.add({
-            targets: circle,
-            scale: { from: 1, to: 0 },   // 縮到 0
-            alpha: { from: 0.8, to: 0 }, // 慢慢透明
-            ease: 'Cubic.easeOut',
-            duration: 400,
-            onComplete: () => circle.destroy()
-        });
-    }
-
 
 }
