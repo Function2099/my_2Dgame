@@ -127,7 +127,7 @@ export default class Attack {
         // 設定hitbox位置
         const offset = this.getOffset(direction);
         hitbox.setPosition(this.player.x + offset.x, this.player.y + offset.y);
-        this.spawnParticles(hitbox.x, hitbox.y)
+        this.effect.spawnParticles(hitbox.x, hitbox.y)
 
         // 啟用hitbox確保不受重力影響
         hitbox.body.enable = true;
@@ -143,8 +143,8 @@ export default class Attack {
 
         this.activeHitboxDirection = direction;
         this.attackStartTime = this.scene.time.now;
-        this.spawnParticles(hitbox.x, hitbox.y);
-        this.spawnExplosionCircle(hitbox.x, hitbox.y, 60);
+        this.effect.spawnParticles(hitbox.x, hitbox.y);
+        this.effect.spawnExplosionCircle(hitbox.x, hitbox.y, 60);
 
         this.scene.physics.overlap(
             hitbox,
