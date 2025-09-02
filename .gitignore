@@ -1,3 +1,9 @@
+# Node.js
 node_modules/
+# 環境設定
 .env
+# 資料庫
 database/
+# 原圖檔
+*.mdp
+*.clip
