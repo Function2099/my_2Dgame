@@ -47,12 +47,7 @@ export default class PlayerController {
         // 玩家面相
         const now = this.status.now;
         const { isGrounded, isTouchingWall, isFalling, onWallLeft } = this.status;
-        // if (this.player.flipX) {
-        //     this.player.setOffset(4, 0); // 翻轉時往左偏移
-        // } else {
-        //     this.player.setOffset(40, 0); // 正常時往右偏移
-        // }
-
+        
         const jumpedFrameHandled = this.updateJumpFrames();
         const landedRecently = this.scene.time.now - this.justLandedAt < 200;
 
@@ -106,7 +101,6 @@ export default class PlayerController {
 
         this.debugGfx.lineStyle(2, 0x00ffff, 1); // 藍色框框
         this.debugGfx.strokeRect(body.x, body.y, body.width, body.height);
-
 
     }
 

@@ -1,27 +1,41 @@
 export default class PlatformManager {
   constructor(scene) {
     this.scene = scene;
-    this.platforms = this.scene.physics.add.staticGroup();
-  }
 
-  createPlatforms() {
-    const layout = [
-      { x: 400, y: 568, scaleX: 10 },
-      { x: 600, y: 380, scaleX: 3 },
-      { x: 200, y: 250, scaleX: 3 },
-      { x: 1200, y: 500, scaleX: 3 },
-      { x: 1800, y: 300, scaleX: 3 },
-    ];
+    const map = this.scene.make.tilemap({ key: 'map_intro' });
+    const tileset = map.addTilesetImage('platform_tiles');
+    const platformLayer = map.createLayer('platforms', tileset);
 
-    layout.forEach(({ x, y, scaleX }) => {
-      this.platforms.create(x, y, 'platform').setScale(scaleX, 1).refreshBody();
+    if (!platformLayer) {
+      console.warn('⚠️ platformLayer 為 null，請確認 Tiled 圖層名稱是否為 "platforms"');
+      return;
+    }
+
+    platformLayer.setCollisionByExclusion([-1]);
+    this.scene.physics.add.collider(this.scene.player, platformLayer);
+    this.platformLayer = platformLayer;
+    this.platformLayer.setCollisionBetween(1, 9999);
+
+    // ✅ 延遲執行 tile 檢查，確保資料已準備好
+    this.scene.time.delayedCall(100, () => {
+      let tileCount = 0;
+      platformLayer.forEachTile(tile => {
+        if (tile.index !== -1) {
+          tileCount++;
+          if (!tile.collides) {
+            console.warn(`⚠️ Tile index ${tile.index} 沒有碰撞框`);
+          }
+        }
+      });
+      console.log(`✅ platformLayer tile 數量：${tileCount}`);
     });
-
-    // 玩家碰撞平台
-    this.scene.physics.add.collider(this.scene.player, this.platforms);
   }
 
   getGroup() {
-    return this.platforms;
+    return this.platformLayer;
+  }
+
+  getLayer() {
+    return this.platformLayer;
   }
 }

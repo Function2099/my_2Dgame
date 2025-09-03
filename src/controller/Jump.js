@@ -57,7 +57,7 @@ export default class Jump {
 
         // 跳躍相關的功能
         if (this.cursors.up.isDown &&
-            this.player.body.touching.down &&
+            this.player.body.blocked.down &&
             !this.isJumping &&
             this.canJump
         ) {
@@ -85,7 +85,6 @@ export default class Jump {
                 this.isJumping = false;
             }
         }
-
 
         // 牆跳狀態判斷
         if ( //條件
@@ -170,11 +169,19 @@ export default class Jump {
         this.wasJumpKeyDown = this.cursors.up.isDown;
 
         // 落地判斷
-        if (!this.cursors.up.isDown && this.player.body.touching.down && !this.isJumping) {
+        if (!this.wasJumpKeyDown &&
+            this.player.body.blocked.down
+        ) {
             this.canJump = true;
             this.isWallJumping = false;
             this.doubleJumpsRemaining = this.maxDoubleJumps;
         }
+
+        // console.log('🟢 落地判斷：', {
+        //     upReleased: !this.cursors.up.isDown,
+        //     blockedDown: this.player.body.blocked.down,
+        //     isJumping: this.isJumping
+        // });
 
     }
 }

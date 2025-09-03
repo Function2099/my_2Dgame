@@ -23,12 +23,11 @@ export class GameScene extends Phaser.Scene {
         // playerGfx.generateTexture('player', 40, 56);
         // playerGfx.destroy();
 
-        // 平台：棕色長條
-        const platformGfx = this.add.graphics();
-        platformGfx.fillStyle(0x8B4513, 1);
-        platformGfx.fillRect(0, 0, 100, 40);
-        platformGfx.generateTexture('platform', 100, 40);
-        platformGfx.destroy();
+        // 平台
+        this.load.tilemapTiledJSON('map_intro', '../assets/platform/map.tmj');
+        this.load.image('bg_intro', '../assets/platform/bg_intro.png');
+        this.load.image('platform_tiles', '../assets/platform/tileset.png');
+
 
         // 敵人：藍色方塊
         const enemyGfx = this.add.graphics();
@@ -65,8 +64,8 @@ export class GameScene extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
 
         // 平台管理
+
         this.platformManager = new PlatformManager(this);
-        this.platformManager.createPlatforms();
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
@@ -92,7 +91,8 @@ export class GameScene extends Phaser.Scene {
 
         // 設定地圖大小
         this.cameras.main.setBounds(0, 0, 2000, 1500);
-        this.physics.world.setBounds(0, 0, 2000, 1500);
+        this.physics.world.setBounds(0, 0, 2000, 1600);
+
 
         // 鏡頭跟隨主角
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
