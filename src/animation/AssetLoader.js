@@ -27,4 +27,14 @@ export function loadAssets(scene) {
         frameWidth: 128,
         frameHeight: 134
     });
+
+    scene.load.spritesheet('player_wallSlide', '../assets/player/player_wallSlide.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
+
+    scene.load.spritesheet('player_double_jump', '../assets/player/player_double_jump.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
 }

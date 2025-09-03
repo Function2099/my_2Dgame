@@ -32,6 +32,8 @@ export default class PlayerController {
         this.wallJumpDirection = 1;
         // 死亡
         this.deathManager = new PlayerDeathManager(this.scene, this.player, this.status, this.jump, this.dash);
+
+        this.player.on('animationcomplete-player_double_jump', this.handleDoubleJumpEnd.bind(this));
     }
 
     update() {
@@ -89,10 +91,12 @@ export default class PlayerController {
         const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
         const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
-        if (currentAnim !== targetAnim) {
+        // ✅ 只有在地面時才播放 idle / walk
+        if (this.status.isGrounded && currentAnim !== targetAnim) {
             this.player.play(targetAnim, true);
         }
 
+        // 顯示邏輯框
         if (!this.debugGfx) {
             this.debugGfx = this.scene.add.graphics();
         }
@@ -120,6 +124,16 @@ export default class PlayerController {
         const isStillOnLandingFrame = this.player.texture.key === 'player_jump' && this.player.frame.name === 0;
         if (this.attack.isAirAttacking) return true;
 
+        if (this.jump.isDoubleJumping) {
+            if (this.player.anims.currentAnim?.key !== 'player_double_jump') {
+                console.log('[二段跳動畫] 播放 player_double_jump');
+                this.player.play('player_double_jump', true);
+            } else {
+                console.log('[二段跳動畫] 已在播放');
+            }
+            return true;
+        }
+
         if (justLanded) {
             this.player.anims.stop();
             this.player.setTexture('player_jump');
@@ -129,6 +143,7 @@ export default class PlayerController {
         }
 
         if (!this.status.isGrounded) {
+
             this.player.anims.stop();
             this.player.setTexture('player_jump');
 
@@ -139,7 +154,18 @@ export default class PlayerController {
             } else if (vy > 200) {
                 this.player.setFrame(3); // 下落（frame 3）
             } else {
-                this.player.setFrame(2); // 到頂也用 frame 2（或你可以設 frame 5）
+                if (
+                    this.status.isTouchingWall &&
+                    !this.status.isGrounded &&
+                    this.status.isFalling &&
+                    !this.dash.isDashing &&
+                    this.scene.time.now >= this.lockHorizontalUntil
+                ) {
+                    this.player.setTexture('player_wallSlide');
+                    this.player.setFrame(0);
+                } else {
+                    this.player.setFrame(2);
+                }
             }
 
             return true;
@@ -149,13 +175,22 @@ export default class PlayerController {
             const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
             const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
-            this.player.setTexture(targetAnim); // 切換貼圖
+            // this.player.setTexture(targetAnim); // 切換貼圖
             this.player.play(targetAnim, true); // 播放動畫
             // console.log('落地自動結束');
             return true;
         }
 
         return false;
+    }
+
+    handleDoubleJumpEnd() {
+        if (!this.status.isGrounded) {
+            this.player.setTexture('player_jump');
+            this.player.setFrame(2); // 回到跳躍頂部幀
+            this.jump.isDoubleJumping = false;
+            console.log('[動畫完成] 二段跳結束，切回 player_jump frame 2');
+        }
     }
 
 }

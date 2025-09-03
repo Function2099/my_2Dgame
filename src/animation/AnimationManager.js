@@ -1,13 +1,13 @@
 export function updatePlayerAnimation(player, cursors, status) {
+    // 如果玩家在空中，就不要覆蓋動畫
+    if (!status.isGrounded) return;
 
-    // 移動還是待機
     const currentAnim = player.anims.currentAnim?.key;
-
     const isMoving = cursors.left.isDown || cursors.right.isDown;
     const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
     if (currentAnim !== targetAnim) {
         player.play(targetAnim, true);
     }
-
 }
+

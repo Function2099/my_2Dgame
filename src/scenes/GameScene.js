@@ -23,13 +23,6 @@ export class GameScene extends Phaser.Scene {
         this.load.image('bg_intro', '../assets/platform/bg_intro.png');
         this.load.image('platform_tiles', '../assets/platform/tileset.png');
 
-        // 敵人：藍色方塊
-        const enemyGfx = this.add.graphics();
-        enemyGfx.fillStyle(0x0000ff, 1);
-        enemyGfx.fillRect(0, 0, 40, 60);
-        enemyGfx.generateTexture('enemy', 40, 60);
-        enemyGfx.destroy();
-
         // 子彈
         const bulletGfx = this.add.graphics();
         bulletGfx.fillStyle(0xffcc00, 1);
@@ -97,9 +90,6 @@ export class GameScene extends Phaser.Scene {
             const enemy = this.enemyManager.spawn(centerX, centerY, type);
             // enemy.setDepth(10); // 可選：讓敵人在平台之上
         });
-        // this.enemyManager.spawn(800, 300, 'ground');
-        // this.enemyManager.spawn(1200, 400, 'ground');
-        // this.enemyManager.spawn(600, 200, 'flying');
 
         this.enemyGroup = this.enemyManager.getGroup();
 
@@ -148,7 +138,7 @@ export class GameScene extends Phaser.Scene {
         console.log('場景創建完成');
         console.log('動畫是否存在：', this.anims.exists('player_idle'));
         this.time.addEvent({
-            delay: 1000, // 每秒
+            delay: 3000, // 三秒一次
             loop: true,
             callback: () => {
                 const { x, y } = this.player;
