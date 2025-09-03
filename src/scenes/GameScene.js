@@ -53,8 +53,12 @@ export class GameScene extends Phaser.Scene {
         sparkGfx.destroy();
 
         // 玩家生成位置
+        // 區域一
         // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
-        this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
+        // 區域二
+        this.player = this.physics.add.sprite(3486, 670, 'player_idle');
+        // 區域三
+        // this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
@@ -79,6 +83,20 @@ export class GameScene extends Phaser.Scene {
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
+        // 從 Tiled 的 enemy_spawns 物件層匯入敵人
+        const enemyObjects = map.getObjectLayer('enemies')?.objects || [];
+
+        enemyObjects.forEach(obj => {
+            const typeProp = obj.properties?.find(p => p.name === 'type');
+            const type = typeProp ? typeProp.value : 'ground';
+
+            // Tiled 是左上角 → Phaser 是中心點
+            const centerX = obj.x + obj.width / 2;
+            const centerY = obj.y + obj.height / 2;
+
+            const enemy = this.enemyManager.spawn(centerX, centerY, type);
+            // enemy.setDepth(10); // 可選：讓敵人在平台之上
+        });
         // this.enemyManager.spawn(800, 300, 'ground');
         // this.enemyManager.spawn(1200, 400, 'ground');
         // this.enemyManager.spawn(600, 200, 'flying');

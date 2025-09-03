@@ -25,7 +25,7 @@ export default class ZoneTriggerManager {
             const zone = trigger.zone;
             const result = Phaser.Geom.Rectangle.Contains(zone, px, py);
 
-            // console.log(`🧪 判定結果：${result} → 玩家(${px}, ${py}) vs 區域(${zone.x}, ${zone.y}, ${zone.width}, ${zone.height})`);
+            // console.log(`判定結果：${result} → 玩家(${px}, ${py}) vs 區域(${zone.x}, ${zone.y}, ${zone.width}, ${zone.height})`);
 
             if (result) {
                 console.log('進入觸發區域，執行事件');

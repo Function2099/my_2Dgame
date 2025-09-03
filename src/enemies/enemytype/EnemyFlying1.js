@@ -23,17 +23,14 @@ export default class EnemyFlying1 extends EnemyBase {
         // === 行為狀態 ===
         this._movementState = 'patrol';
         this._isShooting = false;
-        this.shootPauseDuration = 300;
         this._returning = false;
-        this._isShootingPrep = false; // 前搖：準備射擊、停住
-        this._isShootingFire = false; // 發射：執行射擊邏輯
-        this._isShootingHold = false; // 後搖：射擊後暫停
         this.shootPauseDuration = 350; // 每段停頓時間（可調整）
 
         // === 巡邏行為 ===
         this.patrolSpeed = 40;              // 巡邏移動速度
         this.patrolRadius = 50;             // 巡邏圓半徑
-        this._patrolAngle = 0.02;       // 巡邏角度遞增速度
+        this._patrolAngle = 0;              // 初始角度
+        this._patrolAngleSpeed = 0.02;      // 每幀遞增角度
 
         // === 時間戳管理 ===
         this._escapeCooldownUntil = 0;
@@ -53,6 +50,8 @@ export default class EnemyFlying1 extends EnemyBase {
         this.shootCooldown = 2500;
         this.lastContactTime = 0;
         this.contactDamageCooldown = 500;
+        this.detectedTime = 0;               // 玩家進入範圍的時間
+        this.attackDelayAfterDetect = 1000;  // 偵測後延遲攻擊（毫秒）
 
         // === 偵測範圍可視化 ===
         this.debugCircle = this.scene.add.graphics();
@@ -60,7 +59,7 @@ export default class EnemyFlying1 extends EnemyBase {
     }
 
     update(playerStatus) {
-        if (!playerStatus || !playerStatus.player) return;
+        if (!playerStatus || !playerStatus.player || this.isHit) return;
 
         const player = playerStatus.player;
         const now = this.scene.time.now;
@@ -87,17 +86,11 @@ export default class EnemyFlying1 extends EnemyBase {
 
 
         // 平台避讓邏輯：避免貼住平台底部
-        const platforms = this.scene.platformManager.getGroup().getChildren();
+        const layer = this.scene.platformManager.getLayer();
+        const tileAbove = layer.hasTileAtWorldXY(this.x, this.y - 40); // 偵測上方是否有平台
 
-        for (const platform of platforms) {
-            const bounds = platform.getBounds();
-            const isAbove = bounds.y + bounds.height < this.y;
-            const isHorizontallyAligned = Math.abs(platform.x - this.x) < bounds.width / 2;
-
-            if (isAbove && isHorizontallyAligned && this.y - bounds.y < 40) {
-                blockedAbove = true;
-                break;
-            }
+        if (tileAbove) {
+            blockedAbove = true;
         }
 
         // 碰撞傷害
@@ -128,42 +121,56 @@ export default class EnemyFlying1 extends EnemyBase {
         const now = this.scene.time.now;
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
-        if (distance < this.detectionRange && now - this.lastShotTime > this.shootCooldown) {
-            this.lastShotTime = now;
+        if (distance < this.detectionRange) {
+            // 第一次進入範圍 → 記錄時間
+            if (this.detectedTime === 0) {
+                this.detectedTime = now;
+            }
 
-            const bullet = this.scene.physics.add.sprite(this.x, this.y, 'enemyBullet');
-            bullet.body.allowGravity = false;
-            bullet.setDepth(99);
-            bullet.setData('fromEnemy', true);
+            // 尚未達到攻擊延遲 → 不攻擊
+            if (now - this.detectedTime < this.attackDelayAfterDetect) return;
 
-            const dx = player.x - this.x;
-            const dy = player.y - this.y;
-            const angle = Math.atan2(dy, dx);
+            // 攻擊冷卻判斷
+            if (now - this.lastShotTime > this.shootCooldown) {
+                this.lastShotTime = now;
 
-            const speed = 300;
-            const vx = Math.cos(angle) * speed;
-            const vy = Math.sin(angle) * speed;
+                const bullet = this.scene.physics.add.sprite(this.x, this.y, 'enemyBullet');
+                bullet.body.allowGravity = false;
+                bullet.setDepth(99);
+                bullet.setData('fromEnemy', true);
 
-            bullet.setVelocity(vx, vy);
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const angle = Math.atan2(dy, dx);
 
-            this.scene.physics.add.collider(bullet, this.scene.platformManager.getGroup(), () => {
-                bullet.destroy();
-            });
+                const speed = 300;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
 
-            this.scene.physics.add.overlap(bullet, player, () => {
-                if (!bullet.active || !player.active) return;
+                bullet.setVelocity(vx, vy);
 
-                bullet.destroy();
+                this.scene.physics.add.collider(bullet, this.scene.platformManager.getGroup(), () => {
+                    bullet.destroy();
+                });
 
-                const direction = vx > 0 ? 'right' : 'left';
-                playerStatus.takeHit(bullet.x, direction, 1);
-            });
+                this.scene.physics.add.overlap(bullet, player, () => {
+                    if (!bullet.active || !player.active) return;
 
-            this.scene.time.delayedCall(6000, () => bullet.destroy());
+                    bullet.destroy();
 
-            this.scene.time.delayedCall(this.shootPauseDuration, () => {
-                this._isShooting = false;   //攻擊後解除鎖定
-            });
+                    const direction = vx > 0 ? 'right' : 'left';
+                    playerStatus.takeHit(bullet.x, direction, 1);
+                });
+
+                this.scene.time.delayedCall(6000, () => bullet.destroy());
+
+                this.scene.time.delayedCall(this.shootPauseDuration, () => {
+                    this._isShooting = false;
+                });
+            }
+        } else {
+            // 玩家離開範圍 → 重設偵測時間
+            this.detectedTime = 0;
         }
     }
 
@@ -233,14 +240,24 @@ export default class EnemyFlying1 extends EnemyBase {
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
         if (this._movementState === 'patrol') {
+            this._patrolAngle += this._patrolAngleSpeed;
+
             const targetX = this._origin.x + Math.cos(this._patrolAngle) * this.patrolRadius;
             const targetY = this._origin.y + Math.sin(this._patrolAngle) * this.patrolRadius;
-
+            this.x = this._origin.x + Math.cos(this._patrolAngle) * this.patrolRadius;
+            this.y = this._origin.y + Math.sin(this._patrolAngle) * this.patrolRadius;
             const dx = targetX - this.x;
             const dy = targetY - this.y;
-            const angle = Math.atan2(dy, dx);
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            this.setVelocity(Math.cos(angle) * this.patrolSpeed, Math.sin(angle) * this.patrolSpeed);
+            if (dist > 1) {
+                const vx = Phaser.Math.Clamp((dx / dist) * this.patrolSpeed, -this.patrolSpeed, this.patrolSpeed);
+                const vy = Phaser.Math.Clamp((dy / dist) * this.patrolSpeed, -this.patrolSpeed, this.patrolSpeed);
+                this.setVelocity(vx, vy);
+            } else {
+                this.setVelocity(0, 0);
+            }
+
 
             if (distance < this.detectionRange) {
                 this._movementState = 'engage';
@@ -257,29 +274,25 @@ export default class EnemyFlying1 extends EnemyBase {
 
             // 玩家高度接近時強制上升
             if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) {
-                this._forceRiseUntil = now + 1800;
-                vy = -42;
+                this._forceRiseUntil = now + 2000;
+                vy = -60;
             }
 
             // 碰到平台底部時強制上升
-            const platforms = this.scene.platformManager.getGroup().getChildren();
-            for (const platform of platforms) {
-                const bounds = platform.getBounds();
-                const isHorizontallyAligned = Math.abs(platform.x - this.x) < bounds.width / 2;
+            const layer = this.scene.platformManager.getLayer(); // ✅ 拿到 TilemapLayer
+            const checkX = this.x;
+            const checkY = this.y + this.displayHeight / 2 + 2; // 偵測底部稍微偏下
 
-                const verticalGap = bounds.y - (this.y + this.displayHeight / 2);
-                const isTouchingBottom = verticalGap < 20;
+            const isTouchingBottom = layer.hasTileAtWorldXY(checkX, checkY);
 
-                if (isHorizontallyAligned && isTouchingBottom && now > this._forceRiseUntil) {
-                    this._forceRiseUntil = now + 2000;
-                    vy = -60; //抬升力
-                    break;
-                }
+            if (isTouchingBottom && now > this._forceRiseUntil) {
+                this._forceRiseUntil = now + 2000;
+                vy = -60;
             }
 
             // 如果正在強制上升期間，維持上升速度
             if (now < this._forceRiseUntil && vy === null) {
-                vy = -50;
+                vy = -60;
             }
 
             // 否則使用追蹤邏輯
@@ -291,7 +304,7 @@ export default class EnemyFlying1 extends EnemyBase {
 
             if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
                 this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-                this._engageForceUntil = now + 1500; // 鎖定方向 1.5 秒
+                this._engageForceUntil = now + 1600; // 鎖定方向 1.5 秒
             }
 
             if (now < this._engageForceUntil) {

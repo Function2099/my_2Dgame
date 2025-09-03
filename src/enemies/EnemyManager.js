@@ -25,7 +25,6 @@ export default class EnemyManager {
         return enemy;
     }
 
-
     update(playerStatus) {
         if (!this.scene.isGameActive) return;
         this.enemies.getChildren().forEach(enemy => enemy.update(playerStatus));

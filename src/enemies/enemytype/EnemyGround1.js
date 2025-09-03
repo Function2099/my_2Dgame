@@ -24,6 +24,9 @@ export default class EnemyGround1 extends EnemyBase {
 
         this.lastContactTime = 0;
         this.contactDamageCooldown = 500;
+
+        this.lastTurnTime = 0;
+        this.turnCooldown = 300; // 毫秒，可調整
     }
 
     update(playerStatus) {
@@ -83,26 +86,28 @@ export default class EnemyGround1 extends EnemyBase {
     patrol() {
         this.setVelocityX(this.speed * this.direction);
         this.flipX = this.direction < 0;
+
         if (this.anims.currentAnim?.key !== 'mummy_walk') {
             this.play('mummy_walk', true);
         }
 
-        if (!this.hasGroundAhead()) {
+        const now = this.scene.time.now;
+        const body = this.body;
+        const isBlocked = body.blocked.left || body.blocked.right;
+
+        if ((isBlocked || !this.hasGroundAhead()) && now - this.lastTurnTime > this.turnCooldown) {
             this.direction *= -1;
             this.flipX = this.direction < 0;
+            this.lastTurnTime = now;
         }
     }
 
     hasGroundAhead() {
         const aheadX = this.x + this.direction * 20;
         const aheadY = this.y + this.height / 2 + 2; // 更準確地偵測腳下
-        const sensor = new Phaser.Geom.Rectangle(aheadX, aheadY, 2, 2);
 
-        const platforms = this.scene.platformManager.getGroup().getChildren();
-
-        return platforms.some(platform =>
-            Phaser.Geom.Intersects.RectangleToRectangle(sensor, platform.getBounds())
-        );
+        const layer = this.scene.platformManager.getLayer();
+        return layer.hasTileAtWorldXY(aheadX, aheadY);
     }
 
     attack(playerStatus) {

@@ -120,6 +120,7 @@ export default class Attack {
 
         // 每次攻擊前清除所有敵人的命中標記
         this.enemyGroup.getChildren().forEach(enemy => {
+            enemy._hitThisAttack = false;
         });
 
         if (!hitbox) return;
@@ -150,19 +151,31 @@ export default class Attack {
             hitbox,
             this.enemyGroup,
             (hb, enemy) => {
+                console.log('⚔ 嘗試攻擊敵人：', enemy.constructor.name, enemy.x, enemy.y);
 
                 const line = new Phaser.Geom.Line(hb.x, hb.y, enemy.x, enemy.y);
 
                 // 判斷是否被平台遮擋
-                const blocked = this.platformGroup.getChildren().some(platform =>
-                    Phaser.Geom.Intersects.LineToRectangle(line, platform.body)
-                );
+                const layer = this.scene.platformManager.getLayer();
+                const tileBlocked = layer.getTilesWithinWorldXY(
+                    Math.min(hb.x, enemy.x),
+                    Math.min(hb.y, enemy.y),
+                    Math.abs(hb.x - enemy.x),
+                    Math.abs(hb.y - enemy.y)
+                ).some(tile => tile.index !== -1);
 
-                if (blocked) return; // 被平台擋住，攻擊無效
+                console.log('遮擋判斷結果：', tileBlocked);
+                if (tileBlocked) return;
 
-                // 沒被擋住 → 正常攻擊
-                if (enemy._hitThisAttack) return; // ✅ 每個敵人只吃一次
+                // ✅ 檢查是否已命中過
+                if (enemy._hitThisAttack) {
+                    console.log('已命中過此敵人，跳過');
+                    return;
+                }
+
+                // ✅ 標記為已命中
                 enemy._hitThisAttack = true;
+                console.log('💥 敵人受擊！執行 takeHit()');
 
                 enemy.takeHit(this.player.x, this.activeHitboxDirection);
 
