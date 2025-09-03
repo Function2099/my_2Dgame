@@ -36,6 +36,10 @@ export default class Jump {
     }
 
     update(now, isGrounded, isTouchingWall, isFalling, onWallLeft) {
+
+        // 如果衝刺，直接打斷跳躍
+        if (this.playerStatus?.isDashing) return;
+
         // 牆滑邏輯
         this.isWallSliding = (
             isTouchingWall &&
@@ -122,6 +126,7 @@ export default class Jump {
 
             this.scene.lockHorizontalUntil = this.lockHorizontalUntil;
             this.scene.wallJumpDirection = this.wallJumpDirection;
+            this.doubleJumpsRemaining = this.maxDoubleJumps;
 
             return;
         }
@@ -176,12 +181,5 @@ export default class Jump {
             this.isWallJumping = false;
             this.doubleJumpsRemaining = this.maxDoubleJumps;
         }
-
-        // console.log('🟢 落地判斷：', {
-        //     upReleased: !this.cursors.up.isDown,
-        //     blockedDown: this.player.body.blocked.down,
-        //     isJumping: this.isJumping
-        // });
-
     }
 }

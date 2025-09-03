@@ -4,6 +4,8 @@ import EnemyManager from "../enemies/EnemyManager.js";
 import PlatformManager from "../platforms/PlatformManager.js";
 import { registerAnimations } from '../animation/AnimationRegistry.js';
 import { loadAssets } from "../animation/AssetLoader.js";
+import CameraManager from "../controller/CameraManager.js";
+import ZoneTriggerManager from "../controller/ZoneTriggerManager.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -13,21 +15,13 @@ export class GameScene extends Phaser.Scene {
 
     // 資源加載
     preload() {
+        // 美術資源
         loadAssets(this);
-
-        // 使用簡單幾何圖形代替精靈（暫時不用美術資源）
-        // 玩家：紅色方塊
-        // const playerGfx = this.add.graphics();
-        // playerGfx.fillStyle(0xff0000, 1);
-        // playerGfx.fillRect(0, 0, 40, 56);
-        // playerGfx.generateTexture('player', 40, 56);
-        // playerGfx.destroy();
 
         // 平台
         this.load.tilemapTiledJSON('map_intro', '../assets/platform/map.tmj');
         this.load.image('bg_intro', '../assets/platform/bg_intro.png');
         this.load.image('platform_tiles', '../assets/platform/tileset.png');
-
 
         // 敵人：藍色方塊
         const enemyGfx = this.add.graphics();
@@ -49,9 +43,9 @@ export class GameScene extends Phaser.Scene {
         console.log('創建遊戲場景...');
         console.log('Phaser version =', Phaser.VERSION);
 
-
         registerAnimations(this);
 
+        // 特效
         const sparkGfx = this.add.graphics();
         sparkGfx.fillStyle(0xffffff, 1);
         sparkGfx.fillCircle(10, 10, 10); // 半徑 4px 的白色圓形
@@ -59,13 +53,29 @@ export class GameScene extends Phaser.Scene {
         sparkGfx.destroy();
 
         // 玩家生成位置
-        this.player = this.physics.add.sprite(400, 300, 'player_idle');
+        // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
+        this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
         // 平台管理
 
         this.platformManager = new PlatformManager(this);
+        const map = this.make.tilemap({ key: 'map_intro' });
+        const deathZones = map.getObjectLayer('deathZones')?.objects;
+        console.log('讀取到死亡區域：', deathZones);
+        this.deathZones = deathZones || [];
+
+        // 背景圖片
+        const bgImageLayer = map.images.find(img => img.name === 'bg_intro');
+        if (bgImageLayer) {
+            this.add.image(bgImageLayer.x, bgImageLayer.y, 'bg_intro')
+                .setOrigin(0)
+                .setScrollFactor(0)
+                .setDepth(-10);     // 放在最底層
+        } else {
+            console.warn('找不到圖片"');
+        }
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);
@@ -86,36 +96,47 @@ export class GameScene extends Phaser.Scene {
 
         // 敵人與平台碰撞關係
         this.physics.add.collider(this.enemyGroup, this.platformManager.getGroup());
+
         // 敵人之間的碰撞關係
         this.physics.add.collider(this.enemyGroup, this.enemyGroup);
 
+        // boss房事件觸發
+        const bossZones = map.getObjectLayer('bossTriggers')?.objects || [];
+        this.zoneTriggerManager = new ZoneTriggerManager(this, this.player);
+        this.zoneTriggerManager.registerBossTriggers(bossZones);
+
         // 設定地圖大小
-        this.cameras.main.setBounds(0, 0, 2000, 1500);
-        this.physics.world.setBounds(0, 0, 2000, 1600);
-
-
-        // 鏡頭跟隨主角
-        this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-        this.cameras.main.setFollowOffset(-100, 0);
+        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+        this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
         // 調整全局重力
         this.physics.world.gravity.y = 1200;
 
-        // 控制
+        // 玩家控制
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // 玩家控制邏輯
         this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup, this.platformManager);
 
-        this.physics.world.drawDebug = true;
-        this.physics.world.debugGraphic.clear();
+        // 攝影機
+        this.cameraManager = new CameraManager(this, this.player);
+        this.cameraManager.stopFollow();
+        this.cameraManager.follow();
 
         // esc暫停和回到主選單功能
         this.pauseMenu = new PauseMenu(this);
         this.isGameActive = true;
 
         console.log('場景創建完成');
-        console.log('動畫是否存在：', this.anims.exists('mummy_walk'));
+        console.log('動畫是否存在：', this.anims.exists('player_idle'));
+        this.time.addEvent({
+            delay: 1000, // 每秒
+            loop: true,
+            callback: () => {
+                const { x, y } = this.player;
+                console.log(`玩家座標：(${x.toFixed(2)}, ${y.toFixed(2)})`);
+            }
+        });
 
     }
 
@@ -124,5 +145,6 @@ export class GameScene extends Phaser.Scene {
         if (!this.isGameActive) return;
         this.playerController.update();
         this.enemyManager.update(this.playerController.status);
+        this.zoneTriggerManager.update();
     }
 }

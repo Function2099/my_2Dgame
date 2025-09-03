@@ -12,7 +12,6 @@ export default class EnemyFlying1 extends EnemyBase {
         this.originalY = y;
         this._origin = { x, y };
 
-
         // === 移動參數 ===
         this.detectionRange = 280;
         this.escapeDistance = 100;

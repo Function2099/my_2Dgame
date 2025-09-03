@@ -3,6 +3,7 @@ import Jump from "./Jump.js";
 import PlayerStatus from "./PlayerStatus.js";
 import Attack from "./combat/attack.js";
 import { updatePlayerAnimation } from "../animation/AnimationManager.js";
+import PlayerDeathManager from "./PlayerDeathManager.js";
 
 export default class PlayerController {
     constructor(scene, player, cursors, enemyGroup, platformManager) {
@@ -15,30 +16,33 @@ export default class PlayerController {
         // 玩家大小
         this.player.setSize(38, 132);
         this.player.setDepth(10);
-        // this.player.setOrigin((0.714), 1);
-
         // 玩家狀態
         this.status = new PlayerStatus(player, scene);
         // 衝刺
-        this.dash = new Dash(this.scene, this.player, this.cursors);
+        this.dash = new Dash(this.scene, this.player, this.cursors, this.status);
         this.status.setDashModule(this.dash);
-
         // 跳躍
         this.jump = new Jump(this.scene, this.player, this.cursors, this.status);
         this.status.setJumpModule(this.jump);
         this.justLandedAt = 0;
-
         // 攻擊
         this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup, this.status, this.platformManager.getGroup());
-
         // 牆跳鎖定控制（由 Jump 模組更新後同步）
         this.lockHorizontalUntil = 0;
         this.wallJumpDirection = 1;
-
+        // 死亡
+        this.deathManager = new PlayerDeathManager(this.scene, this.player, this.status, this.jump, this.dash);
     }
 
     update() {
         if (!this.scene.isGameActive) return;
+
+        // 死亡判定
+        if (this.deathManager.checkDeathZone()) {
+            this.deathManager.triggerDeath();
+            return;
+        }
+
         // 更新玩家狀態
         this.status.update();
         // 玩家攻擊狀態
@@ -47,7 +51,7 @@ export default class PlayerController {
         // 玩家面相
         const now = this.status.now;
         const { isGrounded, isTouchingWall, isFalling, onWallLeft } = this.status;
-        
+
         const jumpedFrameHandled = this.updateJumpFrames();
         const landedRecently = this.scene.time.now - this.justLandedAt < 200;
 
@@ -141,14 +145,13 @@ export default class PlayerController {
             return true;
         }
 
-
         if (landedTooLong && isStillOnLandingFrame && this.status.isGrounded) {
             const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
             const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
             this.player.setTexture(targetAnim); // 切換貼圖
             this.player.play(targetAnim, true); // 播放動畫
-            console.log('落地自動結束');
+            // console.log('落地自動結束');
             return true;
         }
 
