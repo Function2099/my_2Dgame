@@ -1,9 +1,11 @@
 import Dash from "./Dash.js";
 import Jump from "./Jump.js";
+import Move from "./Move.js";
 import PlayerStatus from "./PlayerStatus.js";
 import Attack from "./combat/attack.js";
 import { updatePlayerAnimation } from "../animation/AnimationManager.js";
 import PlayerDeathManager from "./PlayerDeathManager.js";
+import PlayerAnimationHandler from "./PlayerAnimationHandler.js";
 
 export default class PlayerController {
     constructor(scene, player, cursors, enemyGroup, platformManager) {
@@ -25,15 +27,17 @@ export default class PlayerController {
         this.jump = new Jump(this.scene, this.player, this.cursors, this.status);
         this.status.setJumpModule(this.jump);
         this.justLandedAt = 0;
+        // 移動
+        this.move = new Move(this.player, this.cursors, this.status, this.dash, () => this.lockHorizontalUntil, () => this.wallJumpDirection);
         // 攻擊
         this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup, this.status, this.platformManager.getGroup());
-        // 牆跳鎖定控制（由 Jump 模組更新後同步）
-        this.lockHorizontalUntil = 0;
-        this.wallJumpDirection = 1;
         // 死亡
         this.deathManager = new PlayerDeathManager(this.scene, this.player, this.status, this.jump, this.dash);
+        this.animHandler = new PlayerAnimationHandler( this.scene, this.player, this.cursors, this.status, this.dash, this.jump, this.attack, () => this.lockHorizontalUntil);
 
-        this.player.on('animationcomplete-player_double_jump', this.handleDoubleJumpEnd.bind(this));
+        this.player.on('animationcomplete-player_double_jump', this.animHandler.handleDoubleJumpEnd.bind(this.animHandler));
+        this.player.on('animationcomplete-player_attack', this.animHandler.handleGroundAttackEnd.bind(this.animHandler));
+        this.player.on('animationcomplete-player_wallSlide_attack', this.animHandler.handleWallAttackEnd.bind(this.animHandler));
     }
 
     update() {
@@ -54,12 +58,13 @@ export default class PlayerController {
         const now = this.status.now;
         const { isGrounded, isTouchingWall, isFalling, onWallLeft } = this.status;
 
-        const jumpedFrameHandled = this.updateJumpFrames();
+        const jumpedFrameHandled = this.animHandler.updateJumpFrames();
         const landedRecently = this.scene.time.now - this.justLandedAt < 200;
 
         if (!jumpedFrameHandled && !landedRecently) {
             updatePlayerAnimation(this.player, this.cursors, this.status);
         }
+        this.attack.updateAnimation();
 
         // 更新行為模組
         this.dash.update(now, isGrounded, isTouchingWall);
@@ -70,29 +75,19 @@ export default class PlayerController {
         this.wallJumpDirection = this.jump.wallJumpDirection;
 
         // 左右移動邏輯
-        if (this.dash.isDashing || now < this.lockHorizontalUntil) {
-            if (!this.dash.isDashing) {
-                this.player.setVelocityX(300 * this.wallJumpDirection);
-            }
-        } else {
-            if (this.status.isKnockbacking) return;
-            if (this.cursors.left.isDown) {
-                this.player.setVelocityX(-225);
-                this.player.flipX = true;
-            } else if (this.cursors.right.isDown) {
-                this.player.setVelocityX(225);
-                this.player.flipX = false;
-            } else {
-                this.player.setVelocityX(0);
-            }
-        }
+        this.move.update(now);
 
         const currentAnim = this.player.anims.currentAnim?.key;
         const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
         const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
-        // ✅ 只有在地面時才播放 idle / walk
-        if (this.status.isGrounded && currentAnim !== targetAnim) {
+        // 在地面時播放 idle / walk
+        if (
+            !this.attack.isGroundAttacking &&
+            this.status.isGrounded &&
+            currentAnim !== targetAnim &&
+            currentAnim !== 'player_attack'
+        ) {
             this.player.play(targetAnim, true);
         }
 
@@ -111,86 +106,4 @@ export default class PlayerController {
         this.debugGfx.strokeRect(body.x, body.y, body.width, body.height);
 
     }
-
-    updateHitboxOffset() {
-        const offsetX = this.player.flipX ? 4 : 40;
-        this.player.setOffset(offsetX, 0);
-    }
-
-    updateJumpFrames() {
-        const justLanded = !this.wasGrounded && this.status.isGrounded;
-        this.wasGrounded = this.status.isGrounded;
-        const landedTooLong = this.scene.time.now - this.justLandedAt > 200;
-        const isStillOnLandingFrame = this.player.texture.key === 'player_jump' && this.player.frame.name === 0;
-        if (this.attack.isAirAttacking) return true;
-
-        if (this.jump.isDoubleJumping) {
-            if (this.player.anims.currentAnim?.key !== 'player_double_jump') {
-                console.log('[二段跳動畫] 播放 player_double_jump');
-                this.player.play('player_double_jump', true);
-            } else {
-                console.log('[二段跳動畫] 已在播放');
-            }
-            return true;
-        }
-
-        if (justLanded) {
-            this.player.anims.stop();
-            this.player.setTexture('player_jump');
-            this.player.setFrame(0); // 落地幀
-            this.justLandedAt = this.scene.time.now; // 記錄落地時間
-            return true;
-        }
-
-        if (!this.status.isGrounded) {
-
-            this.player.anims.stop();
-            this.player.setTexture('player_jump');
-
-            const vy = this.player.body.velocity.y;
-
-            if (vy < -200) {
-                this.player.setFrame(1); // 上升中（frame 2）
-            } else if (vy > 200) {
-                this.player.setFrame(3); // 下落（frame 3）
-            } else {
-                if (
-                    this.status.isTouchingWall &&
-                    !this.status.isGrounded &&
-                    this.status.isFalling &&
-                    !this.dash.isDashing &&
-                    this.scene.time.now >= this.lockHorizontalUntil
-                ) {
-                    this.player.setTexture('player_wallSlide');
-                    this.player.setFrame(0);
-                } else {
-                    this.player.setFrame(2);
-                }
-            }
-
-            return true;
-        }
-
-        if (landedTooLong && isStillOnLandingFrame && this.status.isGrounded) {
-            const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
-            const targetAnim = isMoving ? 'player_walk' : 'player_idle';
-
-            // this.player.setTexture(targetAnim); // 切換貼圖
-            this.player.play(targetAnim, true); // 播放動畫
-            // console.log('落地自動結束');
-            return true;
-        }
-
-        return false;
-    }
-
-    handleDoubleJumpEnd() {
-        if (!this.status.isGrounded) {
-            this.player.setTexture('player_jump');
-            this.player.setFrame(2); // 回到跳躍頂部幀
-            this.jump.isDoubleJumping = false;
-            console.log('[動畫完成] 二段跳結束，切回 player_jump frame 2');
-        }
-    }
-
 }

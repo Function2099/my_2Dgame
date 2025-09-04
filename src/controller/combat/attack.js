@@ -17,6 +17,8 @@ export default class Attack {
         // 攻擊時間紀錄
         this.lastAttackTime = 0;
         this.isAirAttacking = false;
+        this.isGroundAttacking = false;
+        this.isWallSlideAttacking = false;
 
         this.createHitboxes();
         this.bindInput();
@@ -107,14 +109,33 @@ export default class Attack {
         const direction = this.getAttackDirection();
         const hitbox = this.hitboxes[direction];
 
-        if (!this.player.body.onFloor()) {
-            this.player.anims.stop(); // 停止目前動畫
-            this.player.setTexture('player_air_attack'); // 換貼圖
+        if (this.player.body.onFloor()) {
+            this.player.anims.stop();
+            this.player.play('player_attack', true);
+            this.isGroundAttacking = true;
+
+            this.scene.time.delayedCall(300, () => {
+                this.isGroundAttacking = false;
+            });
+        } else {
+            this.player.anims.stop();
+            this.player.setTexture('player_air_attack');
             this.player.setFrame(0);
             this.isAirAttacking = true;
 
             this.scene.time.delayedCall(300, () => {
                 this.isAirAttacking = false;
+            });
+        }
+        if (
+            this.playerStatus.isTouchingWall &&
+            !this.player.body.onFloor()
+        ) {
+            this.player.play('player_wallSlide_attack', true);
+            this.isWallSlideAttacking = true;
+
+            this.scene.time.delayedCall(300, () => {
+                this.isWallSlideAttacking = false;
             });
         }
 
@@ -237,6 +258,23 @@ export default class Attack {
             x = Math.abs(cfg.offsetX);
         }
         return { x, y };
+    }
+
+    updateAnimation() {
+        if (this.isWallSlideAttacking) {
+            const currentAnim = this.player.anims.currentAnim?.key;
+            if (currentAnim !== 'player_wallSlide_attack') {
+                this.player.play('player_wallSlide_attack', true);
+                // console.log('[攻擊] 播放牆滑攻擊動畫');
+            }
+        }
+        if (this.isGroundAttacking) {
+            const currentAnim = this.player.anims.currentAnim?.key;
+            if (currentAnim !== 'player_attack') {
+                this.player.play('player_attack', true);
+                // console.log('[攻擊] 播放地面攻擊動畫');
+            }
+        }
     }
 
 }

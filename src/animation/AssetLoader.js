@@ -23,17 +23,27 @@ export function loadAssets(scene) {
         frameHeight: 134
     });
 
-    scene.load.spritesheet('player_air_attack', '../assets/player/player_air_attack.png', {
-        frameWidth: 128,
-        frameHeight: 134
-    });
-
     scene.load.spritesheet('player_wallSlide', '../assets/player/player_wallSlide.png', {
         frameWidth: 128,
         frameHeight: 134
     });
 
     scene.load.spritesheet('player_double_jump', '../assets/player/player_double_jump.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
+
+    scene.load.spritesheet('player_attack', '../assets/player/player_attack.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
+
+    scene.load.spritesheet('player_wallSlide_attack', '../assets/player/player_wallSlide_attack.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
+
+    scene.load.spritesheet('player_air_attack', '../assets/player/player_air_attack.png', {
         frameWidth: 128,
         frameHeight: 134
     });

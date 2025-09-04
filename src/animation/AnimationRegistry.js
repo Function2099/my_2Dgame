@@ -15,6 +15,8 @@ export function registerAnimations(scene) {
     defineAnim('player_idle', 'player_idle', 0, 4, 6, -1);
     defineAnim('player_walk', 'player_walk', 0, 3, 6, -1);
     defineAnim('player_double_jump', 'player_double_jump', 0, 3, 12, 0);
+    defineAnim('player_attack', 'player_attack', 0, 0, 10, 0); 
+    defineAnim('player_wallSlide_attack', 'player_wallSlide_attack', 0, 0, 10, 0);
 
     // 地面敵人動畫
     defineAnim('mummy_idle', 'mummy_idle', 0, 3, 6, -1);
