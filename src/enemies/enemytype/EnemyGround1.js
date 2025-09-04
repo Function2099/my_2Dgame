@@ -132,11 +132,11 @@ export default class EnemyGround1 extends EnemyBase {
                 const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
 
                 if (hit && isFacingPlayer) {
-                    console.log('玩家被敵人攻擊命中');
+                    // console.log('玩家被敵人攻擊命中');
                     this.showAttackBox();
                     playerStatus.takeHit(this.x);
                 } else {
-                    console.log('攻擊失敗：玩家已脫離範圍');
+                    // console.log('攻擊失敗：玩家已脫離範圍');
                 }
             }
         });

@@ -55,10 +55,10 @@ export default class ZoneTriggerManager {
                             console.log('🗣 BOSS 吼叫！');
 
                             // 顯示 BOSS 登場文字
-                            this.scene.add.text(5900, 1502, '⚔ BOSS 登場 ⚔', {
-                                fontSize: '32px',
-                                color: '#ff0000'
-                            }).setScrollFactor(1).setDepth(100);
+                            // this.scene.add.text(5900, 1502, '⚔ BOSS 登場 ⚔', {
+                            //     fontSize: '32px',
+                            //     color: '#ff0000'
+                            // }).setScrollFactor(1).setDepth(100);
 
                             // 播放音效（目前用 log）
                             console.log('🔊 播放 BOSS 登場音效（boss_intro）');

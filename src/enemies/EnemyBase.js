@@ -12,8 +12,6 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
         this.body.setImmovable(false);    // 被重力影響
         this.body.allowGravity = true;    // 開啟重力影響
 
-        this.hitCount = 0;
-
         // 敵人AI
         this.state = 'idle'; // idle, patrol, chase, attack
 
@@ -38,14 +36,6 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
         }
         if (this.y > bounds.height - margin) {
             this.setY(bounds.height - margin);
-        }
-    }
-
-    takeHit() {
-        this.hitCount++;
-        console.log(`Enemy 被打第 ${this.hitCount} 次`);
-        if (this.hitCount >= 3) {
-            this.destroy(); // 或播放死亡動畫
         }
     }
 

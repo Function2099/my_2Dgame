@@ -29,6 +29,9 @@ export class GameScene extends Phaser.Scene {
         bulletGfx.fillRect(0, 0, 12, 6);
         bulletGfx.generateTexture('enemyBullet', 12, 6);
         bulletGfx.destroy();
+
+        // Boss 專屬方塊（假裝是 Boss）
+
     }
 
     // 測試
@@ -49,9 +52,9 @@ export class GameScene extends Phaser.Scene {
         // 區域一
         // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
         // 區域二
-        this.player = this.physics.add.sprite(3486, 670, 'player_idle');
+        // this.player = this.physics.add.sprite(3486, 670, 'player_idle');
         // 區域三
-        // this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
+        this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
