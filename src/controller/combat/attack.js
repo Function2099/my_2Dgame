@@ -160,8 +160,8 @@ export default class Attack {
         hitbox.body.setImmovable(true);    // 不被其他物件推動
 
         // 顯示hitbox
-        hitbox.setVisible(true);
-        hitbox.setFillStyle(0xffffff, 0.3);
+        hitbox.setVisible(false);
+        // hitbox.setFillStyle(0xffffff, 0.3);
 
         this.activeHitboxDirection = direction;
         this.attackStartTime = this.scene.time.now;
@@ -172,9 +172,7 @@ export default class Attack {
             hitbox,
             this.enemyGroup,
             (hb, enemy) => {
-                console.log('⚔ 嘗試攻擊敵人：', enemy.constructor.name, enemy.x, enemy.y);
-
-                const line = new Phaser.Geom.Line(hb.x, hb.y, enemy.x, enemy.y);
+                // console.log('嘗試攻擊敵人：', enemy.constructor.name, enemy.x, enemy.y);
 
                 // 判斷是否被平台遮擋
                 const layer = this.scene.platformManager.getLayer();
@@ -185,18 +183,18 @@ export default class Attack {
                     Math.abs(hb.y - enemy.y)
                 ).some(tile => tile.index !== -1);
 
-                console.log('遮擋判斷結果：', tileBlocked);
+                // console.log('遮擋判斷結果：', tileBlocked);
                 if (tileBlocked) return;
 
                 // ✅ 檢查是否已命中過
                 if (enemy._hitThisAttack) {
-                    console.log('已命中過此敵人，跳過');
+                    // console.log('已命中過此敵人，跳過');
                     return;
                 }
 
                 // ✅ 標記為已命中
                 enemy._hitThisAttack = true;
-                console.log('敵人受擊！執行 takeHit()');
+                // console.log('敵人受擊！執行 takeHit()');
 
                 enemy.takeHit(this.player.x, this.activeHitboxDirection);
 

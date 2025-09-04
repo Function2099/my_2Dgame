@@ -65,7 +65,7 @@ export default class PlayerStatus {
 
         this.player.setDragX(0);
         this.player.setVelocity(forceX * knockbackX, forceY);
-        console.log('knockback:', forceX, forceY);
+        // console.log('knockback:', forceX, forceY);
 
         // 被擊退的時間
         this.scene.time.delayedCall(duration, () => {
@@ -73,7 +73,7 @@ export default class PlayerStatus {
             this.player.setMaxVelocity(300, 600);
         });
 
-        console.log('[PlayerStatus] 玩家受傷！來自位置:', fromX);
+        // console.log('[PlayerStatus] 玩家受傷！來自位置:', fromX);
 
         // 無敵時間
         this.scene.time.delayedCall(1200, () => {
@@ -81,7 +81,7 @@ export default class PlayerStatus {
             this.player.clearTint();
         });
 
-        console.log(`玩家受擊！`);
+        // console.log(`玩家受擊！`);
 
         if (this.hp <= 0) {
             this.player.setVelocity(0, 0);

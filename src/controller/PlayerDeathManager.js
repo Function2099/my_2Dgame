@@ -12,7 +12,7 @@ export default class PlayerDeathManager {
 
     checkDeathZone() {
         if (!this.deathZones || this.playerStatus?.isDead) {
-            console.log('跳過死亡判定：死亡區未定義或玩家已死亡');
+            // console.log('跳過死亡判定：死亡區未定義或玩家已死亡');
             return false;
         }
 
@@ -23,9 +23,9 @@ export default class PlayerDeathManager {
             Phaser.Geom.Rectangle.Contains(zone, px, py)
         );
 
-        if (inDeathZone) {
-            console.log(`進入死亡區域：(${px}, ${py})`);
-        }
+        // if (inDeathZone) {
+        //     console.log(`進入死亡區域：(${px}, ${py})`);
+        // }
 
         const worldBounds = this.scene.physics.world.bounds;
         const outOfWorld = (
@@ -35,10 +35,10 @@ export default class PlayerDeathManager {
             py > worldBounds.y + worldBounds.height
         );
 
-        if (outOfWorld) {
-            console.log(`超出世界邊界：(${px}, ${py})`);
-            console.log('世界邊界：', worldBounds);
-        }
+        // if (outOfWorld) {
+        //     console.log(`超出世界邊界：(${px}, ${py})`);
+        //     console.log('世界邊界：', worldBounds);
+        // }
 
         return inDeathZone || outOfWorld;
     }

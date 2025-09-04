@@ -6,17 +6,17 @@ export default class EnemyFlying1 extends EnemyBase {
 
         // === 外觀與物理設定 ===
         this.setOrigin(0.5);
-        this.setDisplaySize(40, 28);
+        this.setDisplaySize(135, 88);
         this.setVelocity(0, 0);
         this.body.allowGravity = false;
         this.originalY = y;
         this._origin = { x, y };
 
-        // === 移動參數 ===
-        this.detectionRange = 280;
-        this.escapeDistance = 100;
-        this.escapeSpeed = 150;
-        this.escapeDuration = 1000;
+        // === 偵測距離與速度參數 ===
+        this.detectionRange = 400;
+        this.escapeDistance = 200;
+        this.escapeSpeed = 200;
+        this.escapeDuration = 1500;
         this.escapeCooldown = 4500;
         this.returnDelay = 5000;
 
@@ -52,10 +52,11 @@ export default class EnemyFlying1 extends EnemyBase {
         this.contactDamageCooldown = 500;
         this.detectedTime = 0;               // 玩家進入範圍的時間
         this.attackDelayAfterDetect = 1000;  // 偵測後延遲攻擊（毫秒）
+        this.hitCount = 0;
 
         // === 偵測範圍可視化 ===
-        this.debugCircle = this.scene.add.graphics();
-        this.debugCircle.setDepth(1);
+        // this.debugCircle = this.scene.add.graphics();
+        // this.debugCircle.setDepth(1);
     }
 
     update(playerStatus) {
@@ -105,11 +106,11 @@ export default class EnemyFlying1 extends EnemyBase {
         this.tryShoot(playerStatus);
 
         // 將範圍可視化
-        this.debugCircle.clear();
-        this.debugCircle.lineStyle(10, 0xff0000, 0.5); // 紅色半透明邊框
-        this.debugCircle.strokeCircle(this.x, this.y, this.detectionRange);
-        this.debugCircle.lineStyle(10, 0x00ff00, 0.3); // 綠色半透明
-        this.debugCircle.strokeCircle(this.x, this.y, this.escapeDistance);
+        // this.debugCircle.clear();
+        // this.debugCircle.lineStyle(10, 0xff0000, 0.5); // 紅色半透明邊框
+        // this.debugCircle.strokeCircle(this.x, this.y, this.detectionRange);
+        // this.debugCircle.lineStyle(10, 0x00ff00, 0.3); // 綠色半透明
+        // this.debugCircle.strokeCircle(this.x, this.y, this.escapeDistance);
 
     }
 
@@ -119,9 +120,8 @@ export default class EnemyFlying1 extends EnemyBase {
 
         const player = playerStatus.player;
         const now = this.scene.time.now;
-        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
-        if (distance < this.detectionRange) {
+        if (this.canSeePlayer(player)) {
             // 第一次進入範圍 → 記錄時間
             if (this.detectedTime === 0) {
                 this.detectedTime = now;
@@ -259,7 +259,7 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
 
-            if (distance < this.detectionRange) {
+            if (this.canSeePlayer(player)) {
                 this._movementState = 'engage';
                 this._lostSightTime = now;
             }
@@ -271,6 +271,15 @@ export default class EnemyFlying1 extends EnemyBase {
             const dirX = deltaX > 0 ? 1 : -1;
             const deltaY = player.y - this.y;
             let vy = null;
+
+            if (!this.canSeePlayer(player)) {
+                if (now - this._lostSightTime > 5000) {
+                    this._movementState = 'return';
+                    this._returning = true;
+                    return;
+                }
+                return; // ✅ 玩家不在視線內 → 暫停追擊
+            }
 
             // 玩家高度接近時強制上升
             if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) {
@@ -321,7 +330,7 @@ export default class EnemyFlying1 extends EnemyBase {
                 return;
             }
 
-            if (distance < this.detectionRange) {
+            if (this.canSeePlayer(player)) {
                 this._lostSightTime = now; // 玩家仍在偵測範圍
             }
 
@@ -380,6 +389,26 @@ export default class EnemyFlying1 extends EnemyBase {
             const angle = Math.atan2(dy, dx);
             this.setVelocity(Math.cos(angle) * 60, Math.sin(angle) * 60);
         }
+    }
+
+    canSeePlayer(player) {
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        if (distance > this.detectionRange) return false;
+
+        const layer = this.scene.platformManager.getLayer();
+        const steps = 4;
+        const rayMidX = player.x;
+
+        for (let i = 1; i < steps; i++) {
+            const t = i / steps;
+            const checkX = Phaser.Math.Interpolation.Linear([this.x, player.x], t);
+            const checkY = Phaser.Math.Interpolation.Linear([this.y, player.y], t);
+            const tile = layer.getTileAtWorldXY(checkX, checkY);
+            const isBlocked = tile && !tile.properties?.thin;
+            if (isBlocked) return false;
+        }
+
+        return true;
     }
 
 }

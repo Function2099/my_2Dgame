@@ -23,7 +23,7 @@ export default class PlatformManager {
           }
         }
       });
-      console.log(`✅ platformLayer tile 數量：${tileCount}`);
+      // console.log(`platformLayer tile 數量：${tileCount}`);
     });
   }
 

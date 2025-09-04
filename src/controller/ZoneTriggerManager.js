@@ -28,7 +28,7 @@ export default class ZoneTriggerManager {
             // console.log(`判定結果：${result} → 玩家(${px}, ${py}) vs 區域(${zone.x}, ${zone.y}, ${zone.width}, ${zone.height})`);
 
             if (result) {
-                console.log('進入觸發區域，執行事件');
+                // console.log('進入觸發區域，執行事件');
                 trigger.triggered = true;
                 trigger.onEnter();
             }
@@ -38,7 +38,7 @@ export default class ZoneTriggerManager {
     registerBossTriggers(zoneList) {
         zoneList.forEach(zoneData => {
             this.addTrigger(zoneData, () => {
-                console.log('BOSS房觸發！');
+                // console.log('BOSS房觸發！');
 
                 // 鎖定鏡頭
                 this.scene.cameraManager.lockToBossRoom(5950, 1510);
@@ -63,7 +63,7 @@ export default class ZoneTriggerManager {
                                     boss.injectPlayerController(this.scene.playerController); // ✅ 延遲注入
                                     this.scene.time.delayedCall(1000, () => {
                                         boss.isActivated = true;
-                                        console.log('Boss 行為已啟動');
+                                        // console.log('Boss 行為已啟動');
                                     });
                                 }
 

@@ -47,7 +47,7 @@ export default class PlayerController {
             const currentAnim = this.player.anims.currentAnim?.key;
             if (currentAnim !== 'player_idle') {
                 this.player.play('player_idle', true);
-                console.log('[PlayerController] 玩家封鎖 → 強制 idle 動畫');
+                // console.log('[PlayerController] 玩家封鎖 → 強制 idle 動畫');
             }
             return;
         }
@@ -101,18 +101,18 @@ export default class PlayerController {
         }
 
         // 顯示邏輯框
-        if (!this.debugGfx) {
-            this.debugGfx = this.scene.add.graphics();
-        }
-        this.debugGfx.clear();
+        // if (!this.debugGfx) {
+        //     this.debugGfx = this.scene.add.graphics();
+        // }
+        // this.debugGfx.clear();
 
-        this.debugGfx.lineStyle(2, 0xff00ff, 1); // 紫色框框
-        const bounds = this.player.getBounds();
-        this.debugGfx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        const body = this.player.body;
+        // this.debugGfx.lineStyle(2, 0xff00ff, 1); // 紫色框框
+        // const bounds = this.player.getBounds();
+        // this.debugGfx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        // const body = this.player.body;
 
-        this.debugGfx.lineStyle(2, 0x00ffff, 1); // 藍色框框
-        this.debugGfx.strokeRect(body.x, body.y, body.width, body.height);
+        // this.debugGfx.lineStyle(2, 0x00ffff, 1); // 藍色框框
+        // this.debugGfx.strokeRect(body.x, body.y, body.width, body.height);
 
     }
 }

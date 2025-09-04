@@ -9,7 +9,7 @@ export default class Boss1 extends EnemyBase {
         this.setDisplaySize(147, 201);
         // this.body.setSize(147, 201);   // 碰撞框大小
 
-        this.setDepth(20);
+        this.setDepth(8);
         this.name = 'Boss1';
 
         this.state = 'idle';
@@ -21,10 +21,10 @@ export default class Boss1 extends EnemyBase {
 
         // 讓攻擊模組能安全呼叫
         this.takeHit = (attackerX, direction) => {
-            console.log('[Boss1] 被擊中！', attackerX, direction);
+            // console.log('[Boss1] 被擊中！', attackerX, direction);
             this.hitCount++;
 
-            if (this.hitCount >= 3) {
+            if (this.hitCount >= 10) {
                 this.die({
                     animation: 'boss_death', // 雖然沒動畫，但 die() 需要這個 key
                     disablePhysics: true
@@ -46,7 +46,7 @@ export default class Boss1 extends EnemyBase {
         const touching = this.scene.physics.overlap(this, this.playerRef);
 
         if (touching && now - this.lastContactTime > 500) {
-            console.log('[Boss1]成功碰撞玩家 → 造成傷害');
+            // console.log('[Boss1]成功碰撞玩家 → 造成傷害');
             playerStatus.takeHit(this.x);
             this.lastContactTime = now;
         }
@@ -68,12 +68,12 @@ export default class Boss1 extends EnemyBase {
         if (this.playerRef?.body) {
             this.playerRef.body.enable = false;
             this.playerRef.setVelocity(0);
-            console.log('[Boss1] 玩家物理已封鎖');
+            // console.log('[Boss1] 玩家物理已封鎖');
         }
 
         if (this.playerController) {
             this.playerController.isLocked = true;
-            console.log('[Boss1] 玩家控制器已封鎖');
+            // console.log('[Boss1] 玩家控制器已封鎖');
         }
 
         if (config.disablePhysics) {
@@ -86,12 +86,12 @@ export default class Boss1 extends EnemyBase {
 
             if (this.playerController) {
                 this.playerController.isLocked = false;
-                console.log('[Boss1] 玩家控制器已解除封鎖');
+                // console.log('[Boss1] 玩家控制器已解除封鎖');
             }
 
             if (this.playerRef?.body) {
                 this.playerRef.body.enable = true;
-                console.log('[Boss1] 玩家物理已解除封鎖');
+                // console.log('[Boss1] 玩家物理已解除封鎖');
             }
         });
     }
@@ -99,6 +99,6 @@ export default class Boss1 extends EnemyBase {
     injectPlayerController(controller) {
         this.playerController = controller;
         this.behavior.playerController = controller;
-        console.log('[Boss1] 已延遲注入 playerController');
+        // console.log('[Boss1] 已延遲注入 playerController');
     }
 }

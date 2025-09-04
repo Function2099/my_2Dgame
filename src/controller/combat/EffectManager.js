@@ -13,6 +13,7 @@ export default class EffectManager {
             blendMode: 'ADD',
             emitting: false
         });
+        this.sparkEmitter.setDepth(20);
     }
 
     spawnParticles(x, y, quantity = 12) {
@@ -22,7 +23,8 @@ export default class EffectManager {
 
     spawnExplosionCircle(x, y, radius = 60) {
         const circle = this.scene.add.circle(x, y, radius, 0x00aaff, 0.4)
-            .setStrokeStyle(3, 0xffffff, 0.8);
+            .setStrokeStyle(3, 0xffffff, 0.8)
+            .setDepth(20);
 
         this.scene.tweens.add({
             targets: circle,
