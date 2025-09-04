@@ -48,28 +48,35 @@ export default class PlayerStatus {
     }
 
     // 受攻擊狀態
-    takeHit(fromX = null, direction = null, damage = 1) {
+    takeHit(fromX = null, direction = null, damage = 1, options = {}) {
         if (this.isInvincible || this.isKnockbacking) return; // 暫停玩家控制
+        this.player.setMaxVelocity(9999, 9999);
 
         // this.hp -= 1;剩餘 HP：${this.hp}
         this.isInvincible = true;
         this.isKnockbacking = true;
 
         const knockbackX = fromX !== null ? (this.player.x < fromX ? -1 : 1) : 0;
-        const knockbackForceX = 400 * knockbackX;
-        const knockbackForceY = -250; 
+        const forceX = options.knockbackX ?? 400;
+        const forceY = options.knockbackY ?? -250;
+
+        const duration = options.knockbackDuration ?? 300;
+
 
         this.player.setDragX(0);
-        this.player.setVelocity(knockbackForceX, knockbackForceY);
-        // console.log('knockback:', knockbackForceX, knockbackForceY);
+        this.player.setVelocity(forceX * knockbackX, forceY);
+        console.log('knockback:', forceX, forceY);
 
         // 被擊退的時間
-        this.scene.time.delayedCall(300, () => {
+        this.scene.time.delayedCall(duration, () => {
             this.isKnockbacking = false;
+            this.player.setMaxVelocity(300, 600);
         });
 
+        console.log('[PlayerStatus] 玩家受傷！來自位置:', fromX);
+
         // 無敵時間
-        this.scene.time.delayedCall(1000, () => {
+        this.scene.time.delayedCall(1200, () => {
             this.isInvincible = false;
             this.player.clearTint();
         });

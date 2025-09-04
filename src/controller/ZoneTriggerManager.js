@@ -38,13 +38,14 @@ export default class ZoneTriggerManager {
     registerBossTriggers(zoneList) {
         zoneList.forEach(zoneData => {
             this.addTrigger(zoneData, () => {
-                console.log('🧨 BOSS房觸發！');
+                console.log('BOSS房觸發！');
 
                 // 鎖定鏡頭
                 this.scene.cameraManager.lockToBossRoom(5950, 1510);
 
                 // 停止玩家行動
-                this.scene.player.body.enable = false;
+                this.scene.playerController.isLocked = true;
+
                 this.scene.player.setVelocity(0);
 
                 // 延遲 1 秒後升起門板
@@ -52,21 +53,26 @@ export default class ZoneTriggerManager {
                     this.scene.platformManager.closeBossGate(5408, 1510, 64, 204, () => {
                         // 門升起完成 → BOSS吼叫
                         this.scene.time.delayedCall(500, () => {
-                            console.log('🗣 BOSS 吼叫！');
-
-                            // 顯示 BOSS 登場文字
-                            // this.scene.add.text(5900, 1502, '⚔ BOSS 登場 ⚔', {
-                            //     fontSize: '32px',
-                            //     color: '#ff0000'
-                            // }).setScrollFactor(1).setDepth(100);
-
-                            // 播放音效（目前用 log）
-                            console.log('🔊 播放 BOSS 登場音效（boss_intro）');
-
-                            // 再延遲 500ms → 玩家恢復控制
                             this.scene.time.delayedCall(500, () => {
-                                this.scene.player.body.enable = true;
-                                console.log('🎮 玩家恢復控制');
+                                console.log('BOSS 吼叫！');
+                                console.log('播放 BOSS 登場音效(boss_intro)');
+
+                                // ✅ 啟動 Boss 行為
+                                const boss = this.scene.enemyGroup.getChildren().find(e => e.name === 'Boss1');
+                                if (boss) {
+                                    boss.injectPlayerController(this.scene.playerController); // ✅ 延遲注入
+                                    this.scene.time.delayedCall(1000, () => {
+                                        boss.isActivated = true;
+                                        console.log('Boss 行為已啟動');
+                                    });
+                                }
+
+                                // 玩家恢復控制
+                                this.scene.time.delayedCall(500, () => {
+                                    this.scene.playerController.isLocked = false;
+
+                                    console.log('玩家控制器已解除封鎖');
+                                });
                             });
                         });
                     });

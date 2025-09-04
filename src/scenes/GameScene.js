@@ -30,8 +30,6 @@ export class GameScene extends Phaser.Scene {
         bulletGfx.generateTexture('enemyBullet', 12, 6);
         bulletGfx.destroy();
 
-        // Boss 專屬方塊（假裝是 Boss）
-
     }
 
     // 測試
@@ -58,8 +56,9 @@ export class GameScene extends Phaser.Scene {
         this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
+        // 玩家控制
+        this.cursors = this.input.keyboard.createCursorKeys();
         // 平台管理
-
         this.platformManager = new PlatformManager(this);
         const map = this.make.tilemap({ key: 'map_intro' });
         const deathZones = map.getObjectLayer('deathZones')?.objects;
@@ -124,9 +123,6 @@ export class GameScene extends Phaser.Scene {
         this.physics.world.gravity.y = 1200;
 
         // 玩家控制
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-        // 玩家控制邏輯
         this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup, this.platformManager);
 
         // 攝影機
@@ -140,14 +136,14 @@ export class GameScene extends Phaser.Scene {
 
         console.log('場景創建完成');
         console.log('動畫是否存在：', this.anims.exists('player_idle'));
-        this.time.addEvent({
-            delay: 3000, // 三秒一次
-            loop: true,
-            callback: () => {
-                const { x, y } = this.player;
-                console.log(`玩家座標：(${x.toFixed(2)}, ${y.toFixed(2)})`);
-            }
-        });
+        // this.time.addEvent({
+        //     delay: 3000, // 三秒一次
+        //     loop: true,
+        //     callback: () => {
+        //         const { x, y } = this.player;
+        //         console.log(`玩家座標：(${x.toFixed(2)}, ${y.toFixed(2)})`);
+        //     }
+        // });
 
     }
 

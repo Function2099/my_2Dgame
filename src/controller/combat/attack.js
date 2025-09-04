@@ -196,7 +196,7 @@ export default class Attack {
 
                 // ✅ 標記為已命中
                 enemy._hitThisAttack = true;
-                console.log('💥 敵人受擊！執行 takeHit()');
+                console.log('敵人受擊！執行 takeHit()');
 
                 enemy.takeHit(this.player.x, this.activeHitboxDirection);
 

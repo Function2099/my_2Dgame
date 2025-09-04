@@ -20,28 +20,37 @@ export default class PlayerController {
         this.player.setDepth(10);
         // 玩家狀態
         this.status = new PlayerStatus(player, scene);
-        // 衝刺
+        // 玩家衝刺
         this.dash = new Dash(this.scene, this.player, this.cursors, this.status);
         this.status.setDashModule(this.dash);
-        // 跳躍
+        // 玩家跳躍
         this.jump = new Jump(this.scene, this.player, this.cursors, this.status);
         this.status.setJumpModule(this.jump);
         this.justLandedAt = 0;
-        // 移動
+        // 玩家移動
         this.move = new Move(this.player, this.cursors, this.status, this.dash, () => this.lockHorizontalUntil, () => this.wallJumpDirection);
-        // 攻擊
+        // 玩家攻擊
         this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup, this.status, this.platformManager.getGroup());
-        // 死亡
+        // 玩家死亡
         this.deathManager = new PlayerDeathManager(this.scene, this.player, this.status, this.jump, this.dash);
-        this.animHandler = new PlayerAnimationHandler( this.scene, this.player, this.cursors, this.status, this.dash, this.jump, this.attack, () => this.lockHorizontalUntil);
+        this.animHandler = new PlayerAnimationHandler(this.scene, this.player, this.cursors, this.status, this.dash, this.jump, this.attack, () => this.lockHorizontalUntil);
 
         this.player.on('animationcomplete-player_double_jump', this.animHandler.handleDoubleJumpEnd.bind(this.animHandler));
         this.player.on('animationcomplete-player_attack', this.animHandler.handleGroundAttackEnd.bind(this.animHandler));
         this.player.on('animationcomplete-player_wallSlide_attack', this.animHandler.handleWallAttackEnd.bind(this.animHandler));
+        this.isLocked = false;
     }
 
     update() {
         if (!this.scene.isGameActive) return;
+        if (this.isLocked) {
+            const currentAnim = this.player.anims.currentAnim?.key;
+            if (currentAnim !== 'player_idle') {
+                this.player.play('player_idle', true);
+                console.log('[PlayerController] 玩家封鎖 → 強制 idle 動畫');
+            }
+            return;
+        }
 
         // 死亡判定
         if (this.deathManager.checkDeathZone()) {

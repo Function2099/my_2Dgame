@@ -1,7 +1,7 @@
 import EnemyBase from "./EnemyBase.js";
 import EnemyGround1 from "./enemytype/EnemyGround1.js";
 import EnemyFlying1 from "./enemytype/EnemyFlying1.js";
-import Boss1 from "./enemytype/Boss1.js";
+import Boss1 from "./enemytype/Boss1/Boss1.js";
 
 const enemyTypes = {
     ground: EnemyGround1,
@@ -20,7 +20,7 @@ export default class EnemyManager {
     spawn(x, y, type = 'ground') {
         const EnemyClass = enemyTypes[type] || EnemyBase;
         const enemy = type === 'boss1'
-            ? new EnemyClass(this.scene, x, y, this.scene.player) // ✅ 傳入 player
+            ? new EnemyClass(this.scene, x, y, this.scene.player, null) 
             : new EnemyClass(this.scene, x, y);
 
         this.enemies.add(enemy);
