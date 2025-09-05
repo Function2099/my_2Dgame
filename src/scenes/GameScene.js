@@ -6,6 +6,9 @@ import { registerAnimations } from '../animation/AnimationRegistry.js';
 import { loadAssets } from "../animation/AssetLoader.js";
 import CameraManager from "../controller/CameraManager.js";
 import ZoneTriggerManager from "../controller/ZoneTriggerManager.js";
+import PlayerHealthBar from "../ui/PlayerHealthBar.js";
+import GameTime from "../../utils/GameTime.js";
+import DemoEndScreen from "./DemoEndScreen.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -25,9 +28,9 @@ export class GameScene extends Phaser.Scene {
 
         // 子彈
         const bulletGfx = this.add.graphics();
-        bulletGfx.fillStyle(0xffcc00, 1);
-        bulletGfx.fillRect(0, 0, 12, 6);
-        bulletGfx.generateTexture('enemyBullet', 12, 6);
+        bulletGfx.fillStyle(0xffffff, 1);
+        bulletGfx.fillCircle(16, 16, 12);
+        bulletGfx.generateTexture('enemyBullet', 32, 32); // ✅ 貼圖大小 32x32
         bulletGfx.destroy();
 
     }
@@ -36,6 +39,10 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log('創建遊戲場景...');
         console.log('Phaser version =', Phaser.VERSION);
+        this.physics.world.resume();
+        this.anims.resumeAll();
+        this.time.timeScale = 1;
+        this.isGameActive = true;
 
         registerAnimations(this);
 
@@ -57,7 +64,20 @@ export class GameScene extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
 
         // 玩家控制
-        this.cursors = this.input.keyboard.createCursorKeys();
+        const keyMap = this.registry.get('keyBindings') || {
+            moveLeft: 'LEFT',
+            moveRight: 'RIGHT',
+            Up: 'UP',
+            Down: 'DOWN',
+            jump: 'SPACE',
+            dash: 'X',
+            attack: 'Z'
+        };
+
+        this.inputs = {};
+        for (const action in keyMap) {
+            this.inputs[action] = this.input.keyboard.addKey(keyMap[action]);
+        }
         // 平台管理
         this.platformManager = new PlatformManager(this);
         const map = this.make.tilemap({ key: 'map_intro' });
@@ -89,8 +109,7 @@ export class GameScene extends Phaser.Scene {
             const centerX = obj.x + obj.width / 2;
             const centerY = obj.y + obj.height / 2;
 
-            const enemy = this.enemyManager.spawn(centerX, centerY, type);
-            // enemy.setDepth(10); // 可選：讓敵人在平台之上
+            this.enemyManager.spawn(centerX, centerY, type);
         });
 
         this.enemyGroup = this.enemyManager.getGroup();
@@ -123,7 +142,7 @@ export class GameScene extends Phaser.Scene {
         this.physics.world.gravity.y = 1200;
 
         // 玩家控制
-        this.playerController = new PlayerController(this, this.player, this.cursors, this.enemyGroup, this.platformManager);
+        this.playerController = new PlayerController(this, this.player, this.inputs, this.enemyGroup, this.platformManager);
 
         // 攝影機
         this.cameraManager = new CameraManager(this, this.player);
@@ -133,7 +152,10 @@ export class GameScene extends Phaser.Scene {
         // esc暫停和回到主選單功能
         this.pauseMenu = new PauseMenu(this);
         this.isGameActive = true;
+        this.gameTime = new GameTime(this);
 
+        // 血量條
+        this.playerHealthBar = new PlayerHealthBar(this, 150, 16, 15);
         console.log('場景創建完成');
         console.log('動畫是否存在：', this.anims.exists('player_idle'));
         // this.time.addEvent({
@@ -144,6 +166,10 @@ export class GameScene extends Phaser.Scene {
         //         console.log(`玩家座標：(${x.toFixed(2)}, ${y.toFixed(2)})`);
         //     }
         // });
+        this.events.on('bossDefeated', () => {
+            console.log('[GameScene] 收到 bossDefeated 事件，顯示結算畫面');
+            this.showDemoEndScreen();
+        });
 
     }
 
@@ -153,5 +179,9 @@ export class GameScene extends Phaser.Scene {
         this.playerController.update();
         this.enemyManager.update(this.playerController.status);
         this.zoneTriggerManager.update();
+    }
+
+    showDemoEndScreen() {
+        this.scene.start('DemoEndScene');
     }
 }

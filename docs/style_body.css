@@ -201,6 +201,8 @@ canvas {
     padding: 20px;
     border-radius: 4px;
     transition: background-color 0.3s;
+    font-size: 22px;         /* ✅ 放大字體 */
+    font-weight: 500;        /* ✅ 微加粗，提升可讀性 */
 }
 
 .tab-content li:hover{

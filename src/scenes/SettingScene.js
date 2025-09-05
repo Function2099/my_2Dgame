@@ -1,3 +1,5 @@
+import { createTitleText, createMainMenuButton } from '../ui/UITextHelper.js';
+
 export class SettingsScene extends Phaser.Scene {
   constructor() {
     super('SettingsScene');
@@ -6,41 +8,34 @@ export class SettingsScene extends Phaser.Scene {
   create() {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
-    const buttonSpacing = 30;
+    const buttonSpacing = 80;
 
-    const textStyle = {
-      fontFamily: 'Arial',
-      fontSize: '32px',
-      color: '#ffffff',
-      padding: { top: 10, bottom: 10 }, // 增加上下空間避免裁切
-      align: 'center'
-    };
+    // 深色背景
+    this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, 0x0b0c10)
+      .setAlpha(1);
 
+    // 標題
+    const title = createTitleText(this, centerX, centerY - 150, '設定');
 
-    this.add.text(centerX, centerY - buttonSpacing, '按鍵設定', textStyle)
-      .setOrigin(0.5)
-      .setInteractive()
-      .on('pointerdown', () => {
-        console.log('尚未實作 KeyConfigScene');
-        // this.scene.start('KeyConfigScene');
-      });
+    // 按鈕
+    const keyConfigBtn = createMainMenuButton(this, centerX, centerY, '按鍵設定', () => {
+      this.scene.start('KeyConfigScene');
+    });
 
-    this.add.text(centerX, centerY + buttonSpacing, '聲音設定', textStyle)
-      .setOrigin(0.5)
-      .setInteractive()
-      .on('pointerdown', () => {
-        console.log('還沒做聲音設定介面');
-        // 這裡可以跳轉到 SoundConfigScene 或開啟音量調整 UI
-      });
+    const soundBtn = createMainMenuButton(this, centerX, centerY + buttonSpacing, '聲音設定', () => {
+      console.log('還沒做聲音設定介面');
+    });
 
-
-    const backText = this.add.text(centerX, centerY + (3 * buttonSpacing), '返回主畫面', textStyle)
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
-
-    backText.on('pointerdown', () => {
+    const backBtn = createMainMenuButton(this, centerX, centerY + buttonSpacing * 2, '返回主畫面', () => {
       this.scene.start('MainMenuScene');
     });
 
+    // 淡入動畫
+    this.tweens.add({
+      targets: [title, keyConfigBtn, soundBtn, backBtn],
+      alpha: { from: 0, to: 1 },
+      duration: 900,
+      ease: 'Power2',
+    });
   }
 }

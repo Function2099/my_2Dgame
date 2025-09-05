@@ -1,7 +1,7 @@
 export default class Move {
-    constructor(player, cursors, status, dash, lockHorizontalUntilRef, wallJumpDirectionRef) {
+    constructor(player, inputs, status, dash, lockHorizontalUntilRef, wallJumpDirectionRef) {
         this.player = player;
-        this.cursors = cursors;
+        this.inputs = inputs;
         this.status = status;
         this.dash = dash;
         this.lockHorizontalUntilRef = lockHorizontalUntilRef;
@@ -18,10 +18,10 @@ export default class Move {
             }
         } else {
             if (this.status?.isKnockbacking) return;
-            if (this.cursors.left.isDown) {
+            if (this.inputs.moveLeft.isDown) {
                 this.player.setVelocityX(-225);
                 this.player.flipX = true;
-            } else if (this.cursors.right.isDown) {
+            } else if (this.inputs.moveRight.isDown) {
                 this.player.setVelocityX(225);
                 this.player.flipX = false;
             } else {

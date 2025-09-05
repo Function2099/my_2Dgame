@@ -2,10 +2,10 @@ import AttackConfig from "./AttackConfig.js";
 import EffectManager from "./EffectManager.js";
 
 export default class Attack {
-    constructor(scene, player, input, enemyGroup, playerStatus, platformGroup) {
+    constructor(scene, player, inputs, enemyGroup, playerStatus, platformGroup) {
         this.scene = scene
         this.player = player
-        this.input = input
+        this.inputs = inputs
         this.enemyGroup = enemyGroup; //攻擊敵人用的
         this.playerStatus = playerStatus;
         this.platformGroup = platformGroup;
@@ -21,7 +21,6 @@ export default class Attack {
         this.isWallSlideAttacking = false;
 
         this.createHitboxes();
-        this.bindInput();
 
         // 特效
         this.effect = new EffectManager(scene);
@@ -50,9 +49,6 @@ export default class Attack {
         });
     }
 
-    bindInput() {
-        this.attackKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-    }
 
     update() {
 
@@ -68,7 +64,7 @@ export default class Attack {
 
         // 如果正在攻擊，更新 hitbox 位置並判斷是否結束
         if (this.activeHitboxDirection) {
-            const now = this.scene.time.now;
+            const now = this.scene.gameTime.now();
             const hitbox = this.hitboxes[this.activeHitboxDirection];
 
             // 攻擊時間結束 → 移除 hitbox
@@ -88,8 +84,8 @@ export default class Attack {
         }
 
         // 攻擊鍵按下 → 執行攻擊
-        if (Phaser.Input.Keyboard.JustDown(this.attackKey)) {
-            const now = this.scene.time.now;
+        if (Phaser.Input.Keyboard.JustDown(this.inputs.attack)) {
+            const now = this.scene.gameTime.now();
             if (now - this.lastAttackTime < this.attackCooldown) return;
             this.lastAttackTime = now;
             this.performAttack();
@@ -164,7 +160,7 @@ export default class Attack {
         // hitbox.setFillStyle(0xffffff, 0.3);
 
         this.activeHitboxDirection = direction;
-        this.attackStartTime = this.scene.time.now;
+        this.attackStartTime = this.scene.gameTime.now();
         this.effect.spawnParticles(hitbox.x, hitbox.y);
         this.effect.spawnExplosionCircle(hitbox.x, hitbox.y, 60);
 
@@ -221,8 +217,8 @@ export default class Attack {
             return status.onWallLeft ? 'forwardRight' : 'forwardLeft';
         }
 
-        if (this.input.up.isDown) return 'up';
-        if (this.input.down.isDown) return 'down';
+        if (this.inputs.Up.isDown) return 'up';
+        if (this.inputs.Down.isDown) return 'down';
 
         return 'forward';
     }

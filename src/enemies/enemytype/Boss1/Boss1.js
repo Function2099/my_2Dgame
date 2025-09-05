@@ -5,6 +5,7 @@ export default class Boss1 extends EnemyBase {
     constructor(scene, x, y, playerRef, playerController) {
         super(scene, x, y, null); // 暫時不指定貼圖
         this.playerRef = playerRef;
+        this.sceneRef = scene
         this.playerController = playerController;
         this.setDisplaySize(147, 201);
         // this.body.setSize(147, 201);   // 碰撞框大小
@@ -19,19 +20,6 @@ export default class Boss1 extends EnemyBase {
         this.behavior = new Boss1Behavior(this, scene, playerRef, playerController);
         this.isActivated = false; // 登場前不執行行為
 
-        // 讓攻擊模組能安全呼叫
-        this.takeHit = (attackerX, direction) => {
-            // console.log('[Boss1] 被擊中！', attackerX, direction);
-            this.hitCount++;
-
-            if (this.hitCount >= 10) {
-                this.die({
-                    animation: 'boss_death', // 雖然沒動畫，但 die() 需要這個 key
-                    disablePhysics: true
-                });
-            }
-        };
-
     }
 
     update(playerStatus) {
@@ -40,7 +28,7 @@ export default class Boss1 extends EnemyBase {
 
         this.behavior.update();
 
-        const now = this.scene.time.now;
+        const now = this.scene.gameTime.now();
         this.lastContactTime = this.lastContactTime || 0;
 
         const touching = this.scene.physics.overlap(this, this.playerRef);
@@ -49,6 +37,18 @@ export default class Boss1 extends EnemyBase {
             // console.log('[Boss1]成功碰撞玩家 → 造成傷害');
             playerStatus.takeHit(this.x);
             this.lastContactTime = now;
+        }
+    }
+
+    takeHit() {
+        this.hitCount++;
+        this.takeHitEffect(this.x, this.y, undefined, 10);
+
+        if (this.hitCount >= 1) {
+            this.die({
+                animation: 'boss_death',
+                disablePhysics: true
+            });
         }
     }
 
@@ -93,6 +93,8 @@ export default class Boss1 extends EnemyBase {
                 this.playerRef.body.enable = true;
                 // console.log('[Boss1] 玩家物理已解除封鎖');
             }
+            this.sceneRef.events.emit('bossDefeated');
+
         });
     }
 

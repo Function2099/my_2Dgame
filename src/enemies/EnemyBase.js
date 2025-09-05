@@ -65,4 +65,35 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
             this.destroy();
         });
     }
+
+    takeHitEffect(x, y, color = 0xffffff, count = 6) {
+        this.setTint(0xffffff);
+
+        this.scene.tweens.add({
+            targets: this,
+            alpha: { from: 1, to: 0.4 },
+            duration: 100,
+            yoyo: true,
+            repeat: 2,
+            onComplete: () => {
+                this.clearTint();
+                this.setAlpha(1);
+            }
+        });
+
+        for (let i = 0; i < count; i++) {
+            const px = this.scene.add.rectangle(x, y, 4, 4, color);
+            this.scene.physics.add.existing(px);
+            px.body.setVelocity(
+                Phaser.Math.Between(-80, 80),
+                Phaser.Math.Between(-120, -40)
+            );
+            px.body.allowGravity = false;
+            px.body.setImmovable(true);
+
+            this.scene.time.delayedCall(300, () => {
+                if (px.active) px.destroy();
+            });
+        }
+    }
 }

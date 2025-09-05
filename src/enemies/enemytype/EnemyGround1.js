@@ -7,6 +7,7 @@ export default class EnemyGround1 extends EnemyBase {
         this.setDisplaySize(36, 50);
 
         this.isHit = false;
+        this.hitCount = 0;
         this.play('mummy_idle');
 
         this.detectionRange = 250;
@@ -33,9 +34,9 @@ export default class EnemyGround1 extends EnemyBase {
         if (this.isHit || this.state === 'dead') return;
 
         const player = playerStatus.player;
+        const activeNow = this.scene.gameTime.now();
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
         const offsetX = this.flipX ? -30 : 30;
-        const now = this.scene.time.now;
         const touching = this.scene.physics.overlap(this, playerStatus.player);
         this.attackBox.x = this.x + offsetX;
         this.attackBox.y = this.y;
@@ -55,20 +56,20 @@ export default class EnemyGround1 extends EnemyBase {
         this.enforceWorldBounds();
 
         // 攻擊判定
-        if (this.scene.time.now - this.lastAttackTime > this.attackCooldown) {
+        if (activeNow - this.lastAttackTime > this.attackCooldown) {
             const hit = this.scene.physics.overlap(this.attackBox, playerStatus.player);
             const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
 
             if (hit && isFacingPlayer) {
                 this.attack(playerStatus);
-                this.lastAttackTime = this.scene.time.now;
+                this.lastAttackTime = activeNow;
             }
         }
 
         // 碰撞判定
-        if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
+        if (touching && activeNow - this.lastContactTime > this.contactDamageCooldown) {
             playerStatus.takeHit(this.x);
-            this.lastContactTime = now;
+            this.lastContactTime = activeNow;
         }
     }
 
@@ -91,7 +92,7 @@ export default class EnemyGround1 extends EnemyBase {
             this.play('mummy_walk', true);
         }
 
-        const now = this.scene.time.now;
+        const now = this.scene.gameTime.now();
         const body = this.body;
         const isBlocked = body.blocked.left || body.blocked.right;
 
@@ -165,6 +166,7 @@ export default class EnemyGround1 extends EnemyBase {
         this.hitCount++;
         this.isHit = true;
         this.play('mummy_hurt', true);
+        this.takeHitEffect(this.x, this.y, undefined, 10);
 
         const dir = this.x < attackerX ? -1 : 1;
         const distance = Math.abs(this.x - attackerX);

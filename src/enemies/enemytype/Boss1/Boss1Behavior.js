@@ -24,7 +24,7 @@ export default class Boss1Behavior {
 
     update() {
         this.boss.flipX = this.boss.x > this.player.x;
-        const now = this.scene.time.now;
+        const now = this.scene.gameTime.now();
         if (now - this.lastFacingLogTime > 500) {
             // const facing = this.boss.flipX ? '← 左' : '→ 右';
             // console.log(`[Boss1] 面向方向：${facing}`);
@@ -46,7 +46,7 @@ export default class Boss1Behavior {
 
         this.scene.children.list.forEach(obj => {
             if (obj.name === 'bossWave' && obj.active) {
-                const elapsed = this.scene.time.now - obj.spawnTime;
+                const elapsed = this.scene.gameTime.now() - obj.spawnTime;
                 if (elapsed > 2000) {
                     obj.destroy();
                 }
@@ -76,6 +76,11 @@ export default class Boss1Behavior {
             delay: 100,
             loop: true,
             callback: () => {
+                if (!this.isBossAlive()) {
+                    checkLanding.remove(false);
+                    return;
+                }
+
                 if (this.boss.body.onFloor()) {
                     this.boss.setVelocity(0, 0);
                     checkLanding.remove(false);
@@ -133,6 +138,11 @@ export default class Boss1Behavior {
             delay: 100,
             loop: true,
             callback: () => {
+                if (!this.isBossAlive()) {
+                    checkWall.remove(false);
+                    return;
+                }
+
                 if (Math.abs(this.boss.body.velocity.x) < 1) {
                     this.boss.setVelocityX(0);
                     checkWall.remove(false);
@@ -145,10 +155,14 @@ export default class Boss1Behavior {
                         delay: 100,
                         loop: true,
                         callback: () => {
+                            if (!this.isBossAlive()) {
+                                checkLanding.remove(false);
+                                return;
+                            }
+
                             if (this.boss.body.onFloor()) {
                                 this.boss.setVelocity(0, 0);
                                 checkLanding.remove(false);
-
                                 this.activateHitbox(() => {
                                     this.spawnWave();// ✅ 發射波動
                                     this.boss.body.setGravityY(this.defaultGravityY);
@@ -180,7 +194,7 @@ export default class Boss1Behavior {
                 const wave = this.scene.add.rectangle(startX, startY, 60, 20, 0xff8800);
                 this.scene.physics.add.existing(wave);
                 wave.name = 'bossWave';
-                wave.spawnTime = this.scene.time.now;
+                wave.spawnTime = this.scene.gameTime.now();
 
                 // 設定初速 & 加速度
                 wave.body.setVelocityX(initialSpeed * dir);
@@ -228,5 +242,9 @@ export default class Boss1Behavior {
         this.scene.time.delayedCall(this.attackCooldown, () => {
             this.attackState = 'idle';
         });
+    }
+
+    isBossAlive() {
+        return this.boss?.active && this.boss?.body && this.boss?.state !== 'dead';
     }
 }

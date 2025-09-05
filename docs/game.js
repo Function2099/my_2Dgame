@@ -2,7 +2,8 @@
 import { SettingsScene } from '../src/scenes/SettingScene.js';
 import { MainMenuScene } from '../src/scenes/MainMenuScene.js';
 import { GameScene } from '../src/scenes/GameScene.js';
-
+import { KeyConfigScene } from '../src/scenes/SettingScene/KeyConfigScene.js';
+import DemoEndScene from '../src/scenes/DemoEndScreen.js';
 // 遊戲變數
 let game = null;
 
@@ -27,7 +28,9 @@ const gameConfig = {
     scene: [
         MainMenuScene,
         SettingsScene,
-        GameScene
+        GameScene,
+        KeyConfigScene,
+        DemoEndScene
     ]
 };
 

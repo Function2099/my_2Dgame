@@ -1,8 +1,8 @@
 export default class Dash {
-    constructor(scene, player, cursors, playerStatus) {
+    constructor(scene, player, inputs, playerStatus) {
         this.scene = scene;
         this.player = player;
-        this.cursors = cursors;
+        this.inputs = inputs;
         this.playerStatus = playerStatus;
 
         // 衝刺功能
@@ -11,29 +11,27 @@ export default class Dash {
         this.dashSpeed = 600;
         this.dashCooldown = 500;
         this.lastDashTime = 0;
+        this.inputLockUntil = 0;
 
         // 空中衝刺限制：一次
         this.maxAirDashes = 1;
         this.airDashesRemaining = this.maxAirDashes;
 
-        // 暫時設定衝刺鍵為X(之後可在Setting裡面改)
-        this.dashKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
-
     }
 
     update(now, isGrounded, isTouchingWall) {
+        const dashKey = this.inputs.dash;
         if (isGrounded || isTouchingWall) {
             this.airDashesRemaining = this.maxAirDashes;
         }
 
         const canDashNow =
-            Phaser.Input.Keyboard.JustDown(this.dashKey) &&
+            Phaser.Input.Keyboard.JustDown(dashKey) &&
             !this.isDashing &&
             now > this.lastDashTime + this.dashCooldown &&
             this.airDashesRemaining > 0;
 
         if (canDashNow) {
-            this.airDashesRemaining--;
             this.startDash(now, isGrounded);
         }
 
@@ -54,8 +52,8 @@ export default class Dash {
 
         // 判斷衝刺方向（根據左右鍵）
         let dashDirection = 0;
-        if (this.cursors.left.isDown) dashDirection = -1;
-        else if (this.cursors.right.isDown) dashDirection = 1;
+        if (this.inputs.moveLeft.isDown) dashDirection = -1;
+        else if (this.inputs.moveRight.isDown) dashDirection = 1;
         if (dashDirection === 0) dashDirection = this.player.flipX ? -1 : 1; // 沒按方向鍵就用角色朝向
 
         // 強制鎖定垂直速度

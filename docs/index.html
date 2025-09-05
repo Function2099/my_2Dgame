@@ -67,7 +67,16 @@
     </div>
     <!-- 跳轉超連結 -->
     <header>
-      <h1>welcome my game</h1>
+      <h1
+        style="
+          font-family: 'Microsoft JhengHei', sans-serif;
+          font-size: 36px;
+          color: white;
+          margin-bottom: 12px;
+        "
+      >
+        Welcome to My Game
+      </h1>
       <nav class="navbar">
         <img src="logo.png" alt="Logo" class="logo" />
         <ul class="nav-list">
@@ -97,15 +106,63 @@
         <li onclick="showTab(2)">操作方式</li>
       </ul>
     </div>
-    <section id="game-info" class="tab-panel">
-      <p>喵喵喵，目前測試<br />不對阿</p>
+    <section
+      id="game-info"
+      class="tab-panel"
+      style="text-align: center; padding: 20px"
+    >
+      <h3 style="color: white; margin-bottom: 12px">遊戲介紹</h3>
+      <p style="font-size: 18px; color: #ddd; line-height: 1.6">
+        本遊戲使用 <strong>JavaScript</strong> 搭配
+        <strong>Phaser</strong> 框架製作，<br />
+        為一款 2D 橫向平台戰鬥遊戲，具備模組化架構與可擴充性。
+      </p>
+      <p style="font-size: 16px; color: #ccc; margin-top: 16px">
+        DEMO版本測試中，開源網址：
+      </p>
+      <a
+        href="https://github.com/Function2099/my_2Dgame"
+        style="color: white; text-decoration: underline; font-size: 16px"
+        target="_blank"
+      >
+        🔗 GitHub 專案連結
+      </a>
     </section>
-    <section id="game-controls" class="tab-panel" style="display: none">
-      <p>旺旺旺</p>
+    <section
+      id="game-controls"
+      class="tab-panel"
+      style="display: none; text-align: center; padding: 20px"
+    >
+      <h3 style="color: white; margin-bottom: 12px">操作方式</h3>
+      <div style="display: flex; justify-content: center; padding-top: 8px">
+        <pre
+          style="
+            font-size: 18px;
+            color: white;
+            text-align: left;
+            line-height: 1.8;
+            font-family: 'Consolas', 'Courier New', monospace;
+            white-space: pre;
+            margin: 0;
+          "
+        >
+← / →     左右移動
+↑ / ↓     攻擊方位
+SPACE     跳躍
+X         衝刺
+Z         攻擊
+ESC       暫停 / 取消暫停
+    </pre
+        >
+      </div>
+      <p style="margin-top: 12px; font-size: 16px; color: #ccc">
+        ※ 可在主選單「設定」中自訂鍵位。
+      </p>
     </section>
     <!-- 作者相關 -->
-    <footer>
-      <p>© 2025 趙宇玄製作</p>
-    </footer>
+    <footer style="text-align: center; padding: 20px; color: #888; font-size: 14px;">
+  <p>© 2025 趙宇玄製作</p>
+</footer>
+
   </body>
 </html>

@@ -1,8 +1,8 @@
 export default class PlayerAnimationHandler {
-    constructor(scene, player, cursors, status, dash, jump, attack, getLockUntil) {
+    constructor(scene, player, inputs, status, dash, jump, attack, getLockUntil) {
         this.scene = scene;
         this.player = player;
-        this.cursors = cursors;
+        this.inputs = inputs;
         this.status = status;
         this.dash = dash;
         this.jump = jump;
@@ -16,7 +16,7 @@ export default class PlayerAnimationHandler {
     updateJumpFrames() {
         const justLanded = !this.wasGrounded && this.status.isGrounded;
         this.wasGrounded = this.status.isGrounded;
-        const landedTooLong = this.scene.time.now - this.justLandedAt > 200;
+        const landedTooLong = this.scene.gameTime.now() - this.justLandedAt > 200;
         const isStillOnLandingFrame = this.player.texture.key === 'player_jump' && this.player.frame.name === 0;
         if (this.attack.isAirAttacking) return true;
 
@@ -31,7 +31,7 @@ export default class PlayerAnimationHandler {
             this.player.anims.stop();
             this.player.setTexture('player_jump');
             this.player.setFrame(0);
-            this.justLandedAt = this.scene.time.now;
+            this.justLandedAt = this.scene.gameTime.now();
             return true;
         }
 
@@ -50,7 +50,7 @@ export default class PlayerAnimationHandler {
                     this.status.isTouchingWall &&
                     this.status.isFalling &&
                     !this.dash.isDashing &&
-                    this.scene.time.now >= this.getLockUntil()
+                    this.scene.gameTime.now() >= this.getLockUntil()
                 ) {
                     this.player.setTexture('player_wallSlide');
                     this.player.setFrame(0);
@@ -63,7 +63,7 @@ export default class PlayerAnimationHandler {
         }
 
         if (landedTooLong && isStillOnLandingFrame && this.status.isGrounded) {
-            const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
+            const isMoving = this.inputs.moveLeft.isDown || this.inputs.moveRight.isDown;
             const targetAnim = isMoving ? 'player_walk' : 'player_idle';
             this.player.play(targetAnim, true);
             return true;
@@ -82,7 +82,7 @@ export default class PlayerAnimationHandler {
 
     handleGroundAttackEnd() {
         if (this.status.isGrounded) {
-            const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
+            const isMoving = this.inputs.moveLeft.isDown || this.inputs.moveRight.isDown;
             const targetAnim = isMoving ? 'player_walk' : 'player_idle';
             this.player.play(targetAnim, true);
             // console.log('[動畫完成] 地面攻擊結束，切回', targetAnim);

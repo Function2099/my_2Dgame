@@ -8,10 +8,10 @@ import PlayerDeathManager from "./PlayerDeathManager.js";
 import PlayerAnimationHandler from "./PlayerAnimationHandler.js";
 
 export default class PlayerController {
-    constructor(scene, player, cursors, enemyGroup, platformManager) {
+    constructor(scene, player, inputs, enemyGroup, platformManager) {
         this.scene = scene;
         this.player = player;
-        this.cursors = cursors;
+        this.inputs = inputs;
         this.enemyGroup = enemyGroup;
         this.platformManager = platformManager;
 
@@ -21,19 +21,19 @@ export default class PlayerController {
         // 玩家狀態
         this.status = new PlayerStatus(player, scene);
         // 玩家衝刺
-        this.dash = new Dash(this.scene, this.player, this.cursors, this.status);
+        this.dash = new Dash(this.scene, this.player, this.inputs, this.status);
         this.status.setDashModule(this.dash);
         // 玩家跳躍
-        this.jump = new Jump(this.scene, this.player, this.cursors, this.status);
+        this.jump = new Jump(this.scene, this.player, this.inputs, this.status);
         this.status.setJumpModule(this.jump);
         this.justLandedAt = 0;
         // 玩家移動
-        this.move = new Move(this.player, this.cursors, this.status, this.dash, () => this.lockHorizontalUntil, () => this.wallJumpDirection);
+        this.move = new Move(this.player, this.inputs, this.status, this.dash, () => this.lockHorizontalUntil, () => this.wallJumpDirection);
         // 玩家攻擊
-        this.attack = new Attack(this.scene, this.player, this.cursors, this.enemyGroup, this.status, this.platformManager.getGroup());
+        this.attack = new Attack(this.scene, this.player, this.inputs, this.enemyGroup, this.status, this.platformManager.getGroup());
         // 玩家死亡
         this.deathManager = new PlayerDeathManager(this.scene, this.player, this.status, this.jump, this.dash);
-        this.animHandler = new PlayerAnimationHandler(this.scene, this.player, this.cursors, this.status, this.dash, this.jump, this.attack, () => this.lockHorizontalUntil);
+        this.animHandler = new PlayerAnimationHandler(this.scene, this.player, this.inputs, this.status, this.dash, this.jump, this.attack, () => this.lockHorizontalUntil);
 
         this.player.on('animationcomplete-player_double_jump', this.animHandler.handleDoubleJumpEnd.bind(this.animHandler));
         this.player.on('animationcomplete-player_attack', this.animHandler.handleGroundAttackEnd.bind(this.animHandler));
@@ -68,10 +68,10 @@ export default class PlayerController {
         const { isGrounded, isTouchingWall, isFalling, onWallLeft } = this.status;
 
         const jumpedFrameHandled = this.animHandler.updateJumpFrames();
-        const landedRecently = this.scene.time.now - this.justLandedAt < 200;
+        const landedRecently = this.scene.gameTime.now() - this.justLandedAt < 200;
 
         if (!jumpedFrameHandled && !landedRecently) {
-            updatePlayerAnimation(this.player, this.cursors, this.status);
+            updatePlayerAnimation(this.player, this.inputs, this.status);
         }
         this.attack.updateAnimation();
 
@@ -87,7 +87,7 @@ export default class PlayerController {
         this.move.update(now);
 
         const currentAnim = this.player.anims.currentAnim?.key;
-        const isMoving = this.cursors.left.isDown || this.cursors.right.isDown;
+        const isMoving = this.inputs.moveLeft.isDown || this.inputs.moveRight.isDown;
         const targetAnim = isMoving ? 'player_walk' : 'player_idle';
 
         // 在地面時播放 idle / walk

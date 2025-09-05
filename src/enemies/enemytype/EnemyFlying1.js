@@ -63,7 +63,6 @@ export default class EnemyFlying1 extends EnemyBase {
         if (!playerStatus || !playerStatus.player || this.isHit) return;
 
         const player = playerStatus.player;
-        const now = this.scene.time.now;
         let blockedAbove = false;
         let velocityX = 0;
         let velocityY = 0;
@@ -85,7 +84,6 @@ export default class EnemyFlying1 extends EnemyBase {
         // 行為邏輯
         this.behavioralLogic(playerStatus)
 
-
         // 平台避讓邏輯：避免貼住平台底部
         const layer = this.scene.platformManager.getLayer();
         const tileAbove = layer.hasTileAtWorldXY(this.x, this.y - 40); // 偵測上方是否有平台
@@ -95,9 +93,10 @@ export default class EnemyFlying1 extends EnemyBase {
         }
 
         // 碰撞傷害
+        const activeNow = this.scene.gameTime.now();
         const touching = this.scene.physics.overlap(this, player);
-        if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
-            this.lastContactTime = now;
+        if (touching && activeNow - this.lastContactTime > this.contactDamageCooldown) {
+            this.lastContactTime = activeNow;
             if (playerStatus.takeHit) {
                 playerStatus.takeHit(this.x);
             }
@@ -119,20 +118,20 @@ export default class EnemyFlying1 extends EnemyBase {
         if (!playerStatus || !playerStatus.player) return;
 
         const player = playerStatus.player;
-        const now = this.scene.time.now;
+        const activeNow = this.scene.gameTime.now();
 
         if (this.canSeePlayer(player)) {
             // 第一次進入範圍 → 記錄時間
             if (this.detectedTime === 0) {
-                this.detectedTime = now;
+                this.detectedTime = activeNow;
             }
 
             // 尚未達到攻擊延遲 → 不攻擊
-            if (now - this.detectedTime < this.attackDelayAfterDetect) return;
+            if (activeNow - this.detectedTime < this.attackDelayAfterDetect) return;
 
             // 攻擊冷卻判斷
-            if (now - this.lastShotTime > this.shootCooldown) {
-                this.lastShotTime = now;
+            if (activeNow - this.lastShotTime > this.shootCooldown) {
+                this.lastShotTime = activeNow;
 
                 const bullet = this.scene.physics.add.sprite(this.x, this.y, 'enemyBullet');
                 bullet.body.allowGravity = false;
@@ -178,6 +177,7 @@ export default class EnemyFlying1 extends EnemyBase {
     takeHit(attackerX, direction) {
         this.hitCount++;
         this.isHit = true;
+        this.takeHitEffect(this.x, this.y, undefined, 10);
 
         const dir = this.x < attackerX ? -1 : 1;
         const distance = Math.abs(this.x - attackerX);
@@ -200,7 +200,7 @@ export default class EnemyFlying1 extends EnemyBase {
         }
 
         if (direction === 'up') {
-            this.setVelocity(0, -300);
+            this.setVelocity(0, -350);
             this.setVelocityX(100 * dir);
             this.scene.time.delayedCall(200, () => {
                 this.isHit = false;
@@ -236,7 +236,7 @@ export default class EnemyFlying1 extends EnemyBase {
     // 行為邏輯
     behavioralLogic(playerStatus) {
         const player = playerStatus.player;
-        const now = this.scene.time.now;
+        const now = this.scene.gameTime.now();
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
         if (this._movementState === 'patrol') {

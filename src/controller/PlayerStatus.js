@@ -13,11 +13,29 @@ export default class PlayerStatus {
         this.isWallJumpLocking = false;
         this.wallJumpLockDirection = null;
         this.isKnockbacking = false;
+        this.invincibleEndTime = 0;
+        this.hp = 15;
     }
     update() {
         const body = this.player.body;
         // 時間邏輯
-        this.now = this.scene.time.now;
+        this.now = this.scene.gameTime.now();
+        // 
+        if (this.isInvincible && this.now >= this.invincibleEndTime) {
+            this.isInvincible = false;
+            this.player.clearTint();
+            this.player.setAlpha(1);
+        }
+        if (this.isInvincible) {
+            if (this.now >= this.nextFlashTime) {
+                this.flashOn = !this.flashOn;
+                this.player.setAlpha(this.flashOn ? 1 : 0.4);
+                this.nextFlashTime += this.flashInterval;
+            }
+        } else {
+            this.player.setAlpha(1);
+        }
+
         // 貼牆跳狀態
         this.onWallLeft = body.blocked.left || body.touching.left;
         this.onWallRight = body.blocked.right || body.touching.right;
@@ -51,8 +69,17 @@ export default class PlayerStatus {
     takeHit(fromX = null, direction = null, damage = 1, options = {}) {
         if (this.isInvincible || this.isKnockbacking) return; // 暫停玩家控制
         this.player.setMaxVelocity(9999, 9999);
+        const now = this.scene.gameTime.now();
 
-        // this.hp -= 1;剩餘 HP：${this.hp}
+        // 血量變動
+        if (typeof this.hp === 'number') {
+            this.hp -= damage;
+        }
+
+        if (this.scene.playerHealthBar) {
+            this.scene.playerHealthBar.setHP(this.hp);
+        }
+
         this.isInvincible = true;
         this.isKnockbacking = true;
 
@@ -62,6 +89,7 @@ export default class PlayerStatus {
 
         const duration = options.knockbackDuration ?? 300;
 
+        this.invincibleEndTime = now + 1200;
 
         this.player.setDragX(0);
         this.player.setVelocity(forceX * knockbackX, forceY);
@@ -74,12 +102,13 @@ export default class PlayerStatus {
         });
 
         // console.log('[PlayerStatus] 玩家受傷！來自位置:', fromX);
+        this.player.setTint(0xffffff); // ✅ 閃白
 
-        // 無敵時間
-        this.scene.time.delayedCall(1200, () => {
-            this.isInvincible = false;
-            this.player.clearTint();
-        });
+        this.flashDuration = 1200;
+        this.flashInterval = 100;  // 每次閃爍時間（來回）
+
+        this.nextFlashTime = now + this.flashInterval;
+        this.flashOn = true;
 
         // console.log(`玩家受擊！`);
 

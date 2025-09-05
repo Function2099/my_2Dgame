@@ -1,8 +1,8 @@
 export default class Jump {
-    constructor(scene, player, cursors, playerStatus) {
+    constructor(scene, player, inputs, playerStatus) {
         this.scene = scene;
         this.player = player;
-        this.cursors = cursors;
+        this.inputs = inputs;
         this.playerStatus = playerStatus;
 
         // 普通跳
@@ -60,7 +60,7 @@ export default class Jump {
         }
 
         // 跳躍相關的功能
-        if (this.cursors.up.isDown &&
+        if (this.inputs.jump.isDown &&
             this.player.body.blocked.down &&
             !this.isJumping &&
             this.canJump
@@ -82,7 +82,7 @@ export default class Jump {
 
             const jumpForce = Phaser.Math.Linear(this.jumpVelocity * 0.5, this.jumpVelocity * 1.2, easedProgress);
 
-            if (this.cursors.up.isDown && jumpElapsed < this.maxJumpDuration) {
+            if (this.inputs.jump.isDown && jumpElapsed < this.maxJumpDuration) {
                 const currentX = this.player.body.velocity.x;
                 this.player.setVelocity(currentX, jumpForce); // 保持水平速度
             } else {
@@ -92,7 +92,7 @@ export default class Jump {
 
         // 牆跳狀態判斷
         if ( //條件
-            this.cursors.up.isDown &&
+            this.inputs.jump.isDown &&
             !this.wasJumpKeyDown &&
             !isGrounded &&
             isTouchingWall &&
@@ -139,7 +139,7 @@ export default class Jump {
             const easedProgress = easeOutQuad(progress);
             const jumpForce = Phaser.Math.Linear(this.jumpVelocity * 0.5, this.jumpVelocity * 1.2, easedProgress);
 
-            if (this.cursors.up.isDown && jumpElapsed < this.maxJumpDuration) {
+            if (this.inputs.jump.isDown && jumpElapsed < this.maxJumpDuration) {
                 const currentX = this.player.body.velocity.x;
                 this.player.setVelocity(currentX, jumpForce);
             } else {
@@ -149,7 +149,7 @@ export default class Jump {
 
         // 二段跳邏輯
         if (
-            this.cursors.up.isDown &&
+            this.inputs.jump.isDown &&
             !this.wasJumpKeyDown &&
             !isGrounded &&
             !this.isWallJumping &&
@@ -172,7 +172,7 @@ export default class Jump {
             this.isWallSliding = false;
         }
 
-        this.wasJumpKeyDown = this.cursors.up.isDown;
+        this.wasJumpKeyDown = this.inputs.jump.isDown;
 
         // 落地判斷
         if (!this.wasJumpKeyDown &&
