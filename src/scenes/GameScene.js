@@ -8,7 +8,7 @@ import CameraManager from "../controller/CameraManager.js";
 import ZoneTriggerManager from "../controller/ZoneTriggerManager.js";
 import PlayerHealthBar from "../ui/PlayerHealthBar.js";
 import GameTime from "../../utils/GameTime.js";
-import DemoEndScreen from "./DemoEndScreen.js";
+import EffectManager from "../controller/combat/EffectManager.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -52,6 +52,9 @@ export class GameScene extends Phaser.Scene {
         sparkGfx.fillCircle(10, 10, 10); // 半徑 4px 的白色圓形
         sparkGfx.generateTexture('spark_white', 12, 12); // 產生 8x8 貼圖
         sparkGfx.destroy();
+        if (!(this.effectManager instanceof EffectManager)) {
+            this.effectManager = new EffectManager(this);
+        }
 
         // 玩家生成位置
         // 區域一

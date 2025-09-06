@@ -19,6 +19,8 @@ export default class PlayerAnimationHandler {
         const landedTooLong = this.scene.gameTime.now() - this.justLandedAt > 200;
         const isStillOnLandingFrame = this.player.texture.key === 'player_jump' && this.player.frame.name === 0;
         if (this.attack.isAirAttacking) return true;
+        if (this.dash.isDashing) return true;
+
 
         if (this.jump.isDoubleJumping) {
             if (this.player.anims.currentAnim?.key !== 'player_double_jump') {

@@ -94,6 +94,7 @@ export default class PlayerController {
         if (
             !this.attack.isGroundAttacking &&
             this.status.isGrounded &&
+            !this.status.isDashing &&
             currentAnim !== targetAnim &&
             currentAnim !== 'player_attack'
         ) {

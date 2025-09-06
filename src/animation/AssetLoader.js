@@ -33,6 +33,11 @@ export function loadAssets(scene) {
         frameHeight: 134
     });
 
+    scene.load.spritesheet('player_dash', '../assets/player/player_dash.png', {
+        frameWidth: 128,
+        frameHeight: 134
+    });
+
     scene.load.spritesheet('player_attack', '../assets/player/player_attack.png', {
         frameWidth: 128,
         frameHeight: 134

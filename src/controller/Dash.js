@@ -56,12 +56,16 @@ export default class Dash {
         else if (this.inputs.moveRight.isDown) dashDirection = 1;
         if (dashDirection === 0) dashDirection = this.player.flipX ? -1 : 1; // 沒按方向鍵就用角色朝向
 
+        this.player.play('player_dash', true);
+
         // 強制鎖定垂直速度
         this.player.setAccelerationY(0);
         this.player.setVelocityY(0);
 
         // 
         this.player.setVelocityX(this.dashSpeed * dashDirection);
+
+        this.scene.effectManager.spawnDashTrail(this.player.x, this.player.y, dashDirection);
 
         // 衝刺期間鎖定輸入
         this.inputLockUntil = now + this.dashDuration;

@@ -35,4 +35,37 @@ export default class EffectManager {
             onComplete: () => circle.destroy()
         });
     }
+
+    spawnDashTrail(x, y, direction = 1) {
+        const trailGroup = [];
+
+        const yOffsets = [-25, 0, 40]; // 上中下三層
+        const segmentLength = 60;     // 每段線長度
+        const segmentSpacing = 16;    // 每段間距
+
+        for (const yOffset of yOffsets) {
+            const trail = this.scene.add.graphics();
+            trail.setDepth(15);
+            trail.setScrollFactor(1);
+            trail.lineStyle(4, 0xffffff, 0.8);
+
+            for (let i = 0; i < 3; i++) {
+                const offset = i * segmentSpacing;
+                trail.beginPath();
+                trail.moveTo(x - direction * offset, y + yOffset);
+                trail.lineTo(x - direction * (offset + segmentLength), y + yOffset);
+                trail.strokePath();
+            }
+
+            this.scene.tweens.add({
+                targets: trail,
+                alpha: 0,
+                duration: 250,
+                ease: 'Cubic.easeOut',
+                onComplete: () => trail.destroy()
+            });
+
+            trailGroup.push(trail);
+        }
+    }
 }

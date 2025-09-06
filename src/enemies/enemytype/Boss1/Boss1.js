@@ -44,7 +44,7 @@ export default class Boss1 extends EnemyBase {
         this.hitCount++;
         this.takeHitEffect(this.x, this.y, undefined, 10);
 
-        if (this.hitCount >= 1) {
+        if (this.hitCount >= 10) {
             this.die({
                 animation: 'boss_death',
                 disablePhysics: true
