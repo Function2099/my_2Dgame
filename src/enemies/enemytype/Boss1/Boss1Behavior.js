@@ -191,7 +191,7 @@ export default class Boss1Behavior {
 
         for (let i = 0; i < waveCount; i++) {
             this.scene.time.delayedCall(i * interval, () => {
-                const wave = this.scene.add.rectangle(startX, startY, 60, 20, 0xff8800);
+                const wave = this.scene.add.rectangle(startX, startY, 80, 40, 0xff8800);
                 this.scene.physics.add.existing(wave);
                 wave.name = 'bossWave';
                 wave.spawnTime = this.scene.gameTime.now();

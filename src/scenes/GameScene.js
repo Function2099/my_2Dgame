@@ -21,11 +21,6 @@ export class GameScene extends Phaser.Scene {
         // 美術資源
         loadAssets(this);
 
-        // 平台
-        this.load.tilemapTiledJSON('map_intro', '../assets/platform/map.tmj');
-        this.load.image('bg_intro', '../assets/platform/bg_intro.png');
-        this.load.image('platform_tiles', '../assets/platform/tileset.png');
-
         // 子彈
         const bulletGfx = this.add.graphics();
         bulletGfx.fillStyle(0xffffff, 1);
@@ -170,8 +165,10 @@ export class GameScene extends Phaser.Scene {
         //     }
         // });
         this.events.on('bossDefeated', () => {
-            console.log('[GameScene] 收到 bossDefeated 事件，顯示結算畫面');
-            this.showDemoEndScreen();
+            console.log('[GameScene] 收到 bossDefeated 事件，2 秒後顯示結算畫面');
+            this.time.delayedCall(2000, () => {
+                this.showDemoEndScreen();
+            });
         });
 
     }
@@ -185,6 +182,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     showDemoEndScreen() {
-        this.scene.start('DemoEndScene');
+        this.scene.pause('GameScene');
+        this.scene.launch('DemoEndScene');
     }
 }

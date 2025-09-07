@@ -2,22 +2,24 @@ import EnemyBase from "../EnemyBase.js";
 
 export default class EnemyGround1 extends EnemyBase {
     constructor(scene, x, y) {
-        super(scene, x, y, 'mummy_idle');
+        super(scene, x, y, 'BoneDragon');
 
-        this.setDisplaySize(36, 50);
+        this.setSize(98, 131);
+        this.setOffset(0, 0);
+        this.setOrigin(0.5, 1);
 
         this.isHit = false;
         this.hitCount = 0;
-        this.play('mummy_idle');
+        this.setTexture('BoneDragon');
 
-        this.detectionRange = 250;
+        this.detectionRange = 350;
         this.attackCooldown = 2000;
         this.lastAttackTime = 0;
         this.speed = 50;
         this.chaseSpeed = 80;
         this.direction = 1; // 1 = 右, -1 = 左
 
-        this.attackBox = this.scene.add.zone(this.x, this.y, 28, 40);
+        this.attackBox = this.scene.add.zone(this.x, this.y, 80, 70);
         this.scene.physics.add.existing(this.attackBox);
         this.attackBox.body.setAllowGravity(false);
         this.attackBox.body.setImmovable(true);
@@ -36,15 +38,15 @@ export default class EnemyGround1 extends EnemyBase {
         const player = playerStatus.player;
         const activeNow = this.scene.gameTime.now();
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
-        const offsetX = this.flipX ? -30 : 30;
+        const offsetX = this.flipX ? -70 : 70;
         const touching = this.scene.physics.overlap(this, playerStatus.player);
         this.attackBox.x = this.x + offsetX;
-        this.attackBox.y = this.y;
+        this.attackBox.y = this.y - this.height * 0.5;
 
         if (this.state === 'attack') {
             return; // 攻擊期間不執行其他行為
         }
-        if (distance < this.detectionRange) {
+        if (this.canSeePlayer(player)) {
             this.state = 'chase';
             this.chasePlayer(player);
         } else {
@@ -74,13 +76,16 @@ export default class EnemyGround1 extends EnemyBase {
     }
 
     chasePlayer(player) {
-        const dir = player.x < this.x ? -1 : 1;
+        const deltaX = player.x - this.x;
         const distance = Math.abs(player.x - this.x);
         const speedBoost = Phaser.Math.Clamp(distance * 0.1, 0, 40); // 最多加速 40px/s
+        if (Math.abs(deltaX) > 10) {
+            this.flipX = deltaX < 0;
+        }
+        const dir = deltaX < 0 ? -1 : 1;
         this.setVelocityX((this.chaseSpeed + speedBoost) * dir);
-        this.flipX = dir < 0;
-        if (this.anims.currentAnim?.key !== 'mummy_walk') {
-            this.play('mummy_walk', true);
+        if (this.anims.currentAnim?.key !== 'BoneDragon_walk') {
+            this.play('BoneDragon_walk', true);
         }
     }
 
@@ -88,8 +93,8 @@ export default class EnemyGround1 extends EnemyBase {
         this.setVelocityX(this.speed * this.direction);
         this.flipX = this.direction < 0;
 
-        if (this.anims.currentAnim?.key !== 'mummy_walk') {
-            this.play('mummy_walk', true);
+        if (this.anims.currentAnim?.key !== 'BoneDragon_walk') {
+            this.play('BoneDragon_walk', true);
         }
 
         const now = this.scene.gameTime.now();
@@ -115,19 +120,19 @@ export default class EnemyGround1 extends EnemyBase {
         this.state = 'attack';
         this.setVelocityX(0);
         this.attackFrameTriggered = false;
-        this.play('mummy_attack');
+        this.play('BoneDragon_attack');
 
         const totalFrames = this.anims.currentAnim?.frames.length || 4; // 預設4幀
         const lastFrameIndex = totalFrames - 1;
 
         this.on('animationupdate', (anim, frame) => {
-            if (anim.key === 'mummy_attack' && frame.index === lastFrameIndex && !this.attackFrameTriggered) {
+            if (anim.key === 'BoneDragon_attack' && frame.index === lastFrameIndex && !this.attackFrameTriggered) {
                 this.attackFrameTriggered = true;
 
                 const player = playerStatus.player;
-                const offsetX = this.flipX ? -30 : 30;
+                const offsetX = this.flipX ? -70 : 70;
                 this.attackBox.x = this.x + offsetX;
-                this.attackBox.y = this.y;
+                this.attackBox.y = this.y - this.height * 0.5;
 
                 const hit = this.scene.physics.overlap(this.attackBox, player);
                 const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
@@ -165,7 +170,7 @@ export default class EnemyGround1 extends EnemyBase {
     takeHit(attackerX, direction) {
         this.hitCount++;
         this.isHit = true;
-        this.play('mummy_hurt', true);
+        this.play('BoneDragon_hurt', true);
         this.takeHitEffect(this.x, this.y, undefined, 10);
 
         const dir = this.x < attackerX ? -1 : 1;
@@ -180,7 +185,7 @@ export default class EnemyGround1 extends EnemyBase {
 
             if (this.hitCount >= 3) {
                 this.die({
-                    animation: 'mummy_death',
+                    animation: 'BoneDragon_death',
                     delay: 0,
                     disablePhysics: true
                 });
@@ -197,7 +202,7 @@ export default class EnemyGround1 extends EnemyBase {
 
         if (this.hitCount >= 3) {
             this.die({
-                animation: 'mummy_death',
+                animation: 'BoneDragon_death',
                 knockback: knockback * dir * 0.6,
                 disablePhysics: true
             });

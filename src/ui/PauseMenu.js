@@ -17,16 +17,16 @@ export default class PauseMenu {
         this.overlay.setScrollFactor(0).setDepth(100);
 
         // 標題 (改用UITextHelper的createTitleText)
-        this.title = createTitleText(this.scene, width / 2, 150, '暫停選單')
+        this.title = createTitleText(this.scene, width / 2, 200, '暫停選單')
             .setScrollFactor(0)
             .setDepth(101);
 
         // 按鈕 (改用UITextHelper的createMainMenuButton)
-        this.resumeBtn = createMainMenuButton(this.scene, width / 2, 250, '繼續遊戲', () => this.resume())
+        this.resumeBtn = createMainMenuButton(this.scene, width / 2, 320, '繼續遊戲', () => this.resume())
             .setScrollFactor(0)
             .setDepth(101);
 
-        this.menuBtn = createMainMenuButton(this.scene, width / 2, 320, '回主選單', () => {
+        this.menuBtn = createMainMenuButton(this.scene, width / 2, 420, '回主選單', () => {
             this.scene.physics.world.resume();
             this.scene.anims.resumeAll();
             this.scene.time.timeScale = 1;

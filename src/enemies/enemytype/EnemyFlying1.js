@@ -2,15 +2,17 @@ import EnemyBase from '../EnemyBase.js';
 
 export default class EnemyFlying1 extends EnemyBase {
     constructor(scene, x, y) {
-        super(scene, x, y, 'enemy'); // 可替換為飛行敵人貼圖
+        super(scene, x, y, 'FlyBoneDragon'); // 可替換為飛行敵人貼圖
 
         // === 外觀與物理設定 ===
         this.setOrigin(0.5);
         this.setDisplaySize(135, 88);
+        this.setOffset(0, 14);
         this.setVelocity(0, 0);
         this.body.allowGravity = false;
         this.originalY = y;
         this._origin = { x, y };
+        this.setTexture('FlyBoneDragon');
 
         // === 偵測距離與速度參數 ===
         this.detectionRange = 400;
@@ -18,7 +20,6 @@ export default class EnemyFlying1 extends EnemyBase {
         this.escapeSpeed = 200;
         this.escapeDuration = 1500;
         this.escapeCooldown = 4500;
-        this.returnDelay = 5000;
 
         // === 行為狀態 ===
         this._movementState = 'patrol';
@@ -60,6 +61,10 @@ export default class EnemyFlying1 extends EnemyBase {
     }
 
     update(playerStatus) {
+        if (this.state === 'dead') {
+            return;
+        }
+
         if (!playerStatus || !playerStatus.player || this.isHit) return;
 
         const player = playerStatus.player;
@@ -133,35 +138,14 @@ export default class EnemyFlying1 extends EnemyBase {
             if (activeNow - this.lastShotTime > this.shootCooldown) {
                 this.lastShotTime = activeNow;
 
-                const bullet = this.scene.physics.add.sprite(this.x, this.y, 'enemyBullet');
-                bullet.body.allowGravity = false;
-                bullet.setDepth(99);
-                bullet.setData('fromEnemy', true);
+                if (!this.anims.currentAnim || this.anims.currentAnim.key !== 'FlyBoneDragon_attack') {
+                    this.play('FlyBoneDragon_attack');
+                    // console.log('[FlyBoneDragon] 播放攻擊動畫');
+                }
 
-                const dx = player.x - this.x;
-                const dy = player.y - this.y;
-                const angle = Math.atan2(dy, dx);
-
-                const speed = 300;
-                const vx = Math.cos(angle) * speed;
-                const vy = Math.sin(angle) * speed;
-
-                bullet.setVelocity(vx, vy);
-
-                this.scene.physics.add.collider(bullet, this.scene.platformManager.getGroup(), () => {
-                    bullet.destroy();
+                this.scene.time.delayedCall(300, () => {
+                    this.Bullet(playerStatus);
                 });
-
-                this.scene.physics.add.overlap(bullet, player, () => {
-                    if (!bullet.active || !player.active) return;
-
-                    bullet.destroy();
-
-                    const direction = vx > 0 ? 'right' : 'left';
-                    playerStatus.takeHit(bullet.x, direction, 1);
-                });
-
-                this.scene.time.delayedCall(6000, () => bullet.destroy());
 
                 this.scene.time.delayedCall(this.shootPauseDuration, () => {
                     this._isShooting = false;
@@ -173,11 +157,50 @@ export default class EnemyFlying1 extends EnemyBase {
         }
     }
 
+    Bullet(playerStatus) {
+        const player = playerStatus.player;
+        const bullet = this.scene.physics.add.sprite(this.x, this.y, 'enemyBullet');
+        bullet.body.allowGravity = false;
+        bullet.setDepth(99);
+        bullet.setData('fromEnemy', true);
+
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const angle = Math.atan2(dy, dx);
+
+        const speed = 300;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+
+        bullet.setVelocity(vx, vy);
+
+        this.scene.physics.add.collider(bullet, this.scene.platformManager.getGroup(), () => {
+            bullet.destroy();
+        });
+
+        this.scene.physics.add.overlap(bullet, player, () => {
+            if (!bullet.active || !player.active) return;
+
+            bullet.destroy();
+
+            const direction = vx > 0 ? 'right' : 'left';
+            playerStatus.takeHit(bullet.x, direction, 1);
+        });
+
+        this.scene.time.delayedCall(6000, () => bullet.destroy());
+    }
+
     // 受擊邏輯
     takeHit(attackerX, direction) {
+        if (this.state === 'dead') {
+            return;
+        }
+
         this.hitCount++;
         this.isHit = true;
+        // console.log('[takeHit] hitCount:', this.hitCount);
         this.takeHitEffect(this.x, this.y, undefined, 10);
+        this.play('FlyBoneDragon_hurt');
 
         const dir = this.x < attackerX ? -1 : 1;
         const distance = Math.abs(this.x - attackerX);
@@ -188,15 +211,6 @@ export default class EnemyFlying1 extends EnemyBase {
             this.scene.time.delayedCall(200, () => {
                 this.isHit = false;
             });
-
-            if (this.hitCount >= 3) {
-                this.die({
-                    animation: 'mummy_death',
-                    delay: 0,
-                    disablePhysics: true
-                });
-            }
-            return;
         }
 
         if (direction === 'up') {
@@ -205,15 +219,6 @@ export default class EnemyFlying1 extends EnemyBase {
             this.scene.time.delayedCall(200, () => {
                 this.isHit = false;
             });
-
-            if (this.hitCount >= 3) {
-                this.die({
-                    animation: 'mummy_death',
-                    delay: 0,
-                    disablePhysics: true
-                });
-            }
-            return;
         }
 
         // 一般命中：擊退
@@ -224,13 +229,15 @@ export default class EnemyFlying1 extends EnemyBase {
             this.isHit = false;
         });
 
-        if (this.hitCount >= 3) {
+        if (this.hitCount === 3) {
             this.die({
-                animation: 'mummy_death',
-                knockback: knockback * dir * 0.6,
+                animation: 'FlyBoneDragon_death',
+                knockback: direction === 'down' || direction === 'up' ? undefined : knockback * dir * 0.6,
                 disablePhysics: true
             });
+            return;
         }
+
     }
 
     // 行為邏輯
@@ -248,12 +255,14 @@ export default class EnemyFlying1 extends EnemyBase {
             this.y = this._origin.y + Math.sin(this._patrolAngle) * this.patrolRadius;
             const dx = targetX - this.x;
             const dy = targetY - this.y;
+            this.flipX = Math.cos(this._patrolAngle) < 0;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist > 1) {
                 const vx = Phaser.Math.Clamp((dx / dist) * this.patrolSpeed, -this.patrolSpeed, this.patrolSpeed);
                 const vy = Phaser.Math.Clamp((dy / dist) * this.patrolSpeed, -this.patrolSpeed, this.patrolSpeed);
                 this.setVelocity(vx, vy);
+                this.fly();
             } else {
                 this.setVelocity(0, 0);
             }
@@ -269,6 +278,7 @@ export default class EnemyFlying1 extends EnemyBase {
         if (this._movementState === 'engage') {
             const deltaX = player.x - this.x;
             const dirX = deltaX > 0 ? 1 : -1;
+            this.updateFacingDirection(player.x);
             const deltaY = player.y - this.y;
             let vy = null;
 
@@ -278,7 +288,6 @@ export default class EnemyFlying1 extends EnemyBase {
                     this._returning = true;
                     return;
                 }
-                return; // ✅ 玩家不在視線內 → 暫停追擊
             }
 
             // 玩家高度接近時強制上升
@@ -288,7 +297,7 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
             // 碰到平台底部時強制上升
-            const layer = this.scene.platformManager.getLayer(); // ✅ 拿到 TilemapLayer
+            const layer = this.scene.platformManager.getLayer(); // 拿到 TilemapLayer
             const checkX = this.x;
             const checkY = this.y + this.displayHeight / 2 + 2; // 偵測底部稍微偏下
 
@@ -310,6 +319,7 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
             this.setVelocityY(vy);
+            this.fly();
 
             if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
                 this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
@@ -351,6 +361,7 @@ export default class EnemyFlying1 extends EnemyBase {
             const absDeltaX = Math.abs(deltaX);
 
             let vx = this._lockedDir * this.escapeSpeed;
+            this.updateFacingDirection(player.x);
 
             // 若 X 軸距離太小，觸發強制逃離方向鎖定
             if (absDeltaX < 30 && now > this._forcedEscapeUntil) {
@@ -365,6 +376,7 @@ export default class EnemyFlying1 extends EnemyBase {
             }
 
             this.setVelocity(vx, vy);
+            this.fly();
 
             // 結束逃離狀態（玩家已脫離範圍）
             if (now > this._lockedDirUntil && absDeltaX >= this.escapeDistance) {
@@ -378,6 +390,7 @@ export default class EnemyFlying1 extends EnemyBase {
             const dx = this._origin.x - this.x;
             const dy = this._origin.y - this.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
+            this.flipX = dx < 0;
 
             if (dist < 10) {
                 this._movementState = 'patrol';
@@ -397,7 +410,7 @@ export default class EnemyFlying1 extends EnemyBase {
 
         const layer = this.scene.platformManager.getLayer();
         const steps = 4;
-        const rayMidX = player.x;
+        // const rayMidX = player.x;
 
         for (let i = 1; i < steps; i++) {
             const t = i / steps;
@@ -409,6 +422,26 @@ export default class EnemyFlying1 extends EnemyBase {
         }
 
         return true;
+    }
+
+    updateFacingDirection(targetX) {
+        this.flipX = targetX < this.x;
+    }
+
+    fly() {
+        const current = this.anims.currentAnim?.key;
+        const isAttack = current === 'FlyBoneDragon_attack';
+        const isFinished = this.anims.isPlaying === false;
+
+        if (isAttack && isFinished) {
+            // console.log('[fly] 攻擊動畫已結束，切回移動動畫');
+            this.play('FlyBoneDragon_move', true);
+            return;
+        }
+
+        if (!isAttack) {
+            this.play('FlyBoneDragon_move', true);
+        }
     }
 
 }

@@ -1,12 +1,12 @@
 export default class DemoEndScene extends Phaser.Scene {
     constructor() {
-        super('DemoEndScene');
+        super({ key: 'DemoEndScene', transparent: true });
     }
 
     create() {
         const { width, height } = this.scale;
 
-        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8)
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.6)
             .setAlpha(0)
             .setScrollFactor(0);
 
@@ -88,7 +88,7 @@ export default class DemoEndScene extends Phaser.Scene {
         this.tweens.add({
             targets: [overlay, title, backBtnContainer],
             alpha: 1,
-            duration: 700,
+            duration: 2000,
             ease: 'Power2'
         });
     }

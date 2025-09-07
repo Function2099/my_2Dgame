@@ -1,11 +1,57 @@
 // assets/AssetLoader.js
 export function loadAssets(scene) {
+
+    // 平台
+    scene.load.tilemapTiledJSON('map_intro', '../assets/platform/map.tmj');
+    scene.load.image('bg_intro', '../assets/platform/bg_intro.png');
+    scene.load.image('platform_tiles', '../assets/platform/tileset.png');
+
     // 敵人素材
-    scene.load.spritesheet('mummy_idle', '../assets/enemies/Mummy_idle.png', { frameWidth: 48, frameHeight: 48 });
-    scene.load.spritesheet('mummy_walk', '../assets/enemies/Mummy_walk.png', { frameWidth: 48, frameHeight: 48 });
-    scene.load.spritesheet('mummy_attack', '../assets/enemies/Mummy_attack.png', { frameWidth: 48, frameHeight: 48 });
-    scene.load.spritesheet('mummy_hurt', '../assets/enemies/Mummy_hurt.png', { frameWidth: 48, frameHeight: 48 });
-    scene.load.spritesheet('mummy_death', '../assets/enemies/Mummy_death.png', { frameWidth: 48, frameHeight: 48 });
+    // 地面敵人
+    scene.load.image('BoneDragon', '../assets/enemies/BoneDragon.png');
+
+    scene.load.spritesheet('BoneDragon_walk', '../assets/enemies/BoneDragon_walk.png', {
+        frameWidth: 104,
+        frameHeight: 131
+    });
+
+    scene.load.spritesheet('BoneDragon_attack', '../assets/enemies/BoneDragon_attack.png', {
+        frameWidth: 104,
+        frameHeight: 131
+    });
+
+    scene.load.spritesheet('BoneDragon_hurt', '../assets/enemies/BoneDragon_hurt.png', {
+        frameWidth: 104,
+        frameHeight: 131
+    });
+
+    scene.load.spritesheet('BoneDragon_death', '../assets/enemies/BoneDragon_death.png', {
+        frameWidth: 104,
+        frameHeight: 131
+    });
+
+    // 飛行敵人
+    scene.load.image('FlyBoneDragon', '../assets/enemies/FlyBoneDragon.png');
+
+    scene.load.spritesheet('FlyBoneDragon_move', '../assets/enemies/FlyBoneDragon_move.png', {
+        frameWidth: 135,
+        frameHeight: 102
+    });
+
+    scene.load.spritesheet('FlyBoneDragon_hurt', '../assets/enemies/FlyBoneDragon_hurt.png', {
+        frameWidth: 135,
+        frameHeight: 102
+    });
+
+    scene.load.spritesheet('FlyBoneDragon_attack', '../assets/enemies/FlyBoneDragon_attack.png', {
+        frameWidth: 135,
+        frameHeight: 102
+    });
+
+    scene.load.spritesheet('FlyBoneDragon_death', '../assets/enemies/FlyBoneDragon_death.png', {
+        frameWidth: 135,
+        frameHeight: 102
+    });
 
     // 玩家
     scene.load.spritesheet('player_idle', '../assets/player/player_idle.png', {

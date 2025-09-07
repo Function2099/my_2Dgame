@@ -15,14 +15,18 @@ export function registerAnimations(scene) {
     defineAnim('player_idle', 'player_idle', 0, 4, 6, -1);
     defineAnim('player_walk', 'player_walk', 0, 3, 6, -1);
     defineAnim('player_double_jump', 'player_double_jump', 0, 3, 12, 0);
-    defineAnim('player_attack', 'player_attack', 0, 0, 10, 0); 
+    defineAnim('player_attack', 'player_attack', 0, 0, 10, 0);
     defineAnim('player_wallSlide_attack', 'player_wallSlide_attack', 0, 0, 10, 0);
     defineAnim('player_dash', 'player_dash', 0, 0, 10, 0);
 
     // 地面敵人動畫
-    defineAnim('mummy_idle', 'mummy_idle', 0, 3, 6, -1);
-    defineAnim('mummy_walk', 'mummy_walk', 0, 5, 10, -1);
-    defineAnim('mummy_attack', 'mummy_attack', 0, 5, 10, 0);
-    defineAnim('mummy_hurt', 'mummy_hurt', 0, 1, 10, 0);
-    defineAnim('mummy_death', 'mummy_death', 0, 5, 10, 0);
+    // defineAnim('BoneDragon', 'BoneDragon', 0, 0, 1, 0);
+    defineAnim('BoneDragon_walk', 'BoneDragon_walk', 0, 3, 4, -1);
+    defineAnim('BoneDragon_attack', 'BoneDragon_attack', 0, 4, 8, 0);
+    defineAnim('BoneDragon_hurt', 'BoneDragon_hurt', 0, 1, 10, 0);
+    defineAnim('BoneDragon_death', 'BoneDragon_death', 0, 5, 10, 0);
+    defineAnim('FlyBoneDragon_move','FlyBoneDragon_move', 0, 2, 5, -1)
+    defineAnim('FlyBoneDragon_hurt','FlyBoneDragon_hurt', 0, 1, 10, 0)
+    defineAnim('FlyBoneDragon_attack','FlyBoneDragon_attack', 0, 3, 10, 0)
+    defineAnim('FlyBoneDragon_death','FlyBoneDragon_death', 0, 4, 10, 0)
 }

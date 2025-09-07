@@ -48,20 +48,22 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
         this.state = 'dead';
         this.isHit = true;
 
-        // ✅ 撥放死亡動畫（立即）
+        // 撥放死亡動畫（立即）
         this.play(config.animation);
 
-        // ✅ 不要馬上關掉 physics，讓彈飛能發生
+        // 不要馬上關掉 physics，讓彈飛能發生
         if (config.knockback) {
             this.setVelocityX(config.knockback);
         }
 
-        // ✅ 等動畫結束後再摧毀
+        // 等動畫結束後再摧毀
         this.once('animationcomplete', () => {
+            console.log('[die] 關閉 physics');
             if (config.disablePhysics) {
                 this.body.enable = false;
                 this.attackBox?.body?.enable && (this.attackBox.body.enable = false);
             }
+            console.log('[die] 銷毀角色');
             this.destroy();
         });
     }
@@ -95,5 +97,24 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
                 if (px.active) px.destroy();
             });
         }
+    }
+
+    canSeePlayer(player) {
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        if (distance > this.detectionRange) return false;
+
+        const layer = this.scene.platformManager.getLayer();
+        const steps = 4;
+
+        for (let i = 1; i < steps; i++) {
+            const t = i / steps;
+            const checkX = Phaser.Math.Interpolation.Linear([this.x, player.x], t);
+            const checkY = Phaser.Math.Interpolation.Linear([this.y, player.y], t);
+            const tile = layer.getTileAtWorldXY(checkX, checkY);
+            const isBlocked = tile && !tile.properties?.thin;
+            if (isBlocked) return false;
+        }
+
+        return true;
     }
 }
