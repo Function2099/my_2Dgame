@@ -1,5 +1,5 @@
 const AttackConfig = {
-    cooldown: 400,
+    cooldown: 600,
     duration: 200,
     knockbackPower: 150,
     hitboxes: {

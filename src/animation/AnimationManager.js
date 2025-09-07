@@ -11,3 +11,17 @@ export function updatePlayerAnimation(player, inputs, status) {
     }
 }
 
+export function bindAnimationCorrection(sprite, animationKey, onStartConfig, onCompleteConfig) {
+    sprite.on(`animationstart-${animationKey}`, () => {
+        if (onStartConfig.origin) sprite.setOrigin(onStartConfig.origin.x, onStartConfig.origin.y);
+        if (onStartConfig.size) sprite.setSize(onStartConfig.size.width, onStartConfig.size.height);
+        if (onStartConfig.offset) sprite.setOffset(onStartConfig.offset.x, onStartConfig.offset.y);
+    });
+
+    sprite.on(`animationcomplete-${animationKey}`, () => {
+        if (onCompleteConfig.texture) sprite.setTexture(onCompleteConfig.texture);
+        if (onCompleteConfig.origin) sprite.setOrigin(onCompleteConfig.origin.x, onCompleteConfig.origin.y);
+        if (onCompleteConfig.size) sprite.setSize(onCompleteConfig.size.width, onCompleteConfig.size.height);
+        if (onCompleteConfig.offset) sprite.setOffset(onCompleteConfig.offset.x, onCompleteConfig.offset.y);
+    });
+}

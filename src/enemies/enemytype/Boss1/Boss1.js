@@ -1,13 +1,19 @@
 import EnemyBase from "../../EnemyBase.js";
 import Boss1Behavior from "./Boss1Behavior.js";
+import { bindAnimationCorrection } from "../../../animation/AnimationManager.js";
 
 export default class Boss1 extends EnemyBase {
     constructor(scene, x, y, playerRef, playerController) {
-        super(scene, x, y, null); // 暫時不指定貼圖
+        super(scene, x, y, 'Boss'); // 暫時不指定貼圖
         this.playerRef = playerRef;
         this.sceneRef = scene
         this.playerController = playerController;
-        this.setDisplaySize(147, 201);
+        this.setTexture('Boss');
+        this.setSize(138, 197);
+        this.setOrigin(0.5, 1);
+        this.setOffset(88, 23);
+        this.setTint(0x000000);
+        // this.setOffset(0, 28)
         // this.body.setSize(147, 201);   // 碰撞框大小
 
         this.setDepth(8);
@@ -19,6 +25,12 @@ export default class Boss1 extends EnemyBase {
 
         this.behavior = new Boss1Behavior(this, scene, playerRef, playerController);
         this.isActivated = false; // 登場前不執行行為
+
+
+        // bindAnimationCorrection(this, 'Boss_attack',
+        //     { origin: { x: 0.5, y: 1 }, size: { width: 168, height: 197 }, offset: { x: 0, y: 23 } },
+        //     { texture: 'Boss', origin: { x: 0.5, y: 1 }, size: { width: 138, height: 197 }, offset: { x: 0, y: 0 } }
+        // );
 
     }
 
@@ -46,57 +58,83 @@ export default class Boss1 extends EnemyBase {
 
         if (this.hitCount >= 10) {
             this.die({
-                animation: 'boss_death',
+                animation: 'Boss_death',
                 disablePhysics: true
             });
         }
     }
 
-    die(config) {
-        if (!config || !config.animation) {
-            console.warn('[Boss1] die() 缺少 animation 屬性，跳過動畫播放');
-        }
-
-        if (this.state === 'dead') return;
-        this.state = 'dead';
-        this.isHit = true;
-
-        console.log('[Boss1] 進入死亡狀態');
-
-        // 封鎖玩家行動
-
-        if (this.playerRef?.body) {
-            this.playerRef.body.enable = false;
-            this.playerRef.setVelocity(0);
-            // console.log('[Boss1] 玩家物理已封鎖');
-        }
-
-        if (this.playerController) {
-            this.playerController.isLocked = true;
-            // console.log('[Boss1] 玩家控制器已封鎖');
-        }
-
-        if (config.disablePhysics) {
-            this.body.enable = false;
-        }
-
-        // 延遲摧毀 Boss，並解除玩家封鎖
-        this.scene.time.delayedCall(3000, () => {
-            this.destroy();
-
-            if (this.playerController) {
-                this.playerController.isLocked = false;
-                // console.log('[Boss1] 玩家控制器已解除封鎖');
-            }
-
-            if (this.playerRef?.body) {
-                this.playerRef.body.enable = true;
-                // console.log('[Boss1] 玩家物理已解除封鎖');
-            }
-            this.sceneRef.events.emit('bossDefeated');
-
-        });
+die(config) {
+    if (!config || !config.animation) {
+        console.warn('[Boss1] die() 缺少 animation 屬性，跳過動畫播放');
     }
+
+    if (this.state === 'dead') return;
+    this.state = 'dead';
+    this.anims.stop();
+    this.isHit = true;
+
+    console.log('[Boss1] 進入死亡狀態');
+
+    if (this.playerRef?.body) {
+        this.playerRef.body.enable = false;
+        this.playerRef.setVelocity(0);
+    }
+
+    if (this.playerController) {
+        this.playerController.isLocked = true;
+    }
+
+    if (config.disablePhysics) {
+        this.body.enable = false;
+    }
+
+    // ✅ 讓 Boss 掉落
+    this.body.setAllowGravity(true);
+    this.body.setImmovable(false);
+    this.body.enable = true;
+
+    const waitForLanding = this.scene.time.addEvent({
+        delay: 100,
+        loop: true,
+        callback: () => {
+            if (this.body.onFloor()) {
+                waitForLanding.remove(false);
+
+                this.body.setVelocity(0, 0);
+                this.body.setAllowGravity(false);
+                this.body.setImmovable(true);
+                this.body.enable = false;
+
+                this.setDepth(5);
+
+                // ✅ 播逐幀死亡動畫
+                const deathFrames = [0, 1, 2, 3];
+                const frameDelay = 750;
+
+                deathFrames.forEach((frameIndex, i) => {
+                    this.scene.time.delayedCall(i * frameDelay, () => {
+                        this.setTexture(config.animation, frameIndex);
+                    });
+                });
+
+                // ✅ 播完後解除玩家封鎖
+                this.scene.time.delayedCall(deathFrames.length * frameDelay, () => {
+                    if (this.playerController) {
+                        this.playerController.isLocked = false;
+                    }
+
+                    if (this.playerRef?.body) {
+                        this.playerRef.body.enable = true;
+                    }
+
+                    this.sceneRef.events.emit('bossDefeated');
+                    // console.log('[Boss1] 死亡動畫完成 → 已落地並凍結');
+                });
+            }
+        }
+    });
+}
 
     injectPlayerController(controller) {
         this.playerController = controller;

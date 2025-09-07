@@ -101,10 +101,14 @@ export default class EnemyFlying1 extends EnemyBase {
         const activeNow = this.scene.gameTime.now();
         const touching = this.scene.physics.overlap(this, player);
         if (touching && activeNow - this.lastContactTime > this.contactDamageCooldown) {
-            this.lastContactTime = activeNow;
-            if (playerStatus.takeHit) {
-                playerStatus.takeHit(this.x);
-            }
+            this._lastContactTime = now;
+
+            this.playerController?.status?.takeHit(this.boss.x, null, 1, {
+                knockbackX: 460,
+                knockbackY: -250,
+                knockbackDuration: 550
+            });
+
         }
 
         this.tryShoot(playerStatus);

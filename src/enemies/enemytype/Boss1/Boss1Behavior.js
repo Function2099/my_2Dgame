@@ -3,17 +3,19 @@ export default class Boss1Behavior {
         this.boss = boss;
         this.scene = scene;
         this.player = player;
+        this.boss.flipX = true;
         this.playerController = null;
 
         this.attackState = 'idle';
         this.attackCooldown = 870;
 
-        this.attackBox = this.scene.add.zone(this.boss.x, this.boss.y, 200, 120);
+        this.attackBox = this.scene.add.zone(this.boss.x, this.boss.y, 160, 120);
         this.scene.physics.add.existing(this.attackBox);
         this.attackBox.body.setAllowGravity(false);
         this.attackBox.body.setImmovable(true);
         this.attackBox.body.setEnable(false);
         this.attackBox.body.enable = false;
+        this._lockFacing = false;
 
         this.defaultGravityY = this.scene.physics.world.gravity.y;
 
@@ -23,7 +25,9 @@ export default class Boss1Behavior {
     }
 
     update() {
-        this.boss.flipX = this.boss.x > this.player.x;
+        if (!this._lockFacing) {
+            this.boss.flipX = this.boss.x > this.player.x;
+        }
         const now = this.scene.gameTime.now();
         if (now - this.lastFacingLogTime > 500) {
             // const facing = this.boss.flipX ? '← 左' : '→ 右';
@@ -70,6 +74,7 @@ export default class Boss1Behavior {
 
         const jumpSpeedX = Phaser.Math.Clamp((destinationX - this.boss.x) * 2, -200, 200);
         this.boss.setVelocity(jumpSpeedX, -1200);
+        this.boss.play('Boss_attack_jump');
 
         // 等待落地
         const checkLanding = this.scene.time.addEvent({
@@ -82,9 +87,19 @@ export default class Boss1Behavior {
                 }
 
                 if (this.boss.body.onFloor()) {
-                    this.boss.setVelocity(0, 0);
                     checkLanding.remove(false);
-                    this.activateHitbox(() => this.enterCooldown());
+                    this.boss.setVelocity(0, 0);
+
+                    this.boss.setTexture('Boss_attack', 5);
+
+                    this.activateHitbox(() => {
+                        this.boss.setTexture('Boss');
+                        this.boss.setOrigin(0.5, 1);
+                        this.boss.setSize(138, 197);
+                        this.boss.setOffset(88, 23);
+                        this.enterCooldown();
+                    });
+
                     this.boss.body.setGravityY(this.defaultGravityY);
                 }
             }
@@ -127,13 +142,16 @@ export default class Boss1Behavior {
     }
 
     retreatWave() {
+        this._lockFacing = true;
         this.attackState = 'retreatWave';
         this.boss.body.setGravityY(450);
 
         const dir = this.boss.flipX ? -1 : 1;
-        this.boss.setVelocityX(dir * 300); // ✅ 水平衝刺速度
+        this.boss.setVelocityX(dir * 350); // 水平衝刺速度
+        this.boss.flipX = dir < 0;
+        this.boss.play('Boss_dash');
 
-        // ✅ 等待撞牆
+        // 等待撞牆
         const checkWall = this.scene.time.addEvent({
             delay: 100,
             loop: true,
@@ -149,6 +167,10 @@ export default class Boss1Behavior {
 
                     // 跳起來
                     this.boss.setVelocityY(-800);
+                    this.boss.play('Boss_attack_jump');
+
+                    const playerX = this.player?.x ?? this.boss.x;
+                    this.boss.flipX = playerX < this.boss.x;
 
                     // 等待落地
                     const checkLanding = this.scene.time.addEvent({
@@ -163,8 +185,14 @@ export default class Boss1Behavior {
                             if (this.boss.body.onFloor()) {
                                 this.boss.setVelocity(0, 0);
                                 checkLanding.remove(false);
+                                this.boss.setTexture('Boss_attack', 5);
+                                this.spawnWave();
+
                                 this.activateHitbox(() => {
-                                    this.spawnWave();// ✅ 發射波動
+                                    this.boss.setTexture('Boss');
+                                    this.boss.setOrigin(0.5, 1);
+                                    this.boss.setSize(138, 197);
+                                    this.boss.setOffset(88, 23);
                                     this.boss.body.setGravityY(this.defaultGravityY);
                                     this.enterCooldown();
                                 });
@@ -180,9 +208,9 @@ export default class Boss1Behavior {
         const dir = this.boss.flipX ? -1 : 1;
 
         // 改成從 attackBox 的中心生成
-        const bounds = this.attackBox.getBounds();
-        const startX = bounds.centerX;
-        const startY = bounds.bottom - 20;
+        // const bounds = this.attackBox.getBounds();
+        const startX = this.boss.x + (this.boss.flipX ? -140 : 140);
+        const startY = this.boss.body.bottom - 20;
 
         const waveCount = 3;     // 發射幾個波動
         const interval = 200;    // 每個波動間隔
@@ -191,9 +219,10 @@ export default class Boss1Behavior {
 
         for (let i = 0; i < waveCount; i++) {
             this.scene.time.delayedCall(i * interval, () => {
-                const wave = this.scene.add.rectangle(startX, startY, 80, 40, 0xff8800);
+                const wave = this.scene.add.image(startX, startY, 'wava');
                 this.scene.physics.add.existing(wave);
                 wave.name = 'bossWave';
+                wave.flipX = dir < 0;
                 wave.spawnTime = this.scene.gameTime.now();
 
                 // 設定初速 & 加速度
@@ -214,13 +243,14 @@ export default class Boss1Behavior {
                 });
 
                 for (let j = 0; j < 4; j++) {
-                    const tail = this.scene.add.rectangle(startX - dir * j * 20, startY, 60 - j * 10, 20, 0xffaa00);
+                    const tail = this.scene.add.sprite(startX - dir * j * 20, startY + 15, 'small_wava');
                     this.scene.physics.add.existing(tail);
                     tail.body.setVelocityX(initialSpeed * dir);
                     tail.body.setAccelerationX(accel * dir);
                     tail.body.allowGravity = false;
                     tail.body.setImmovable(true);
                     tail.alpha = 0.6 - j * 0.1;
+                    tail.flipX = dir < 0;
 
                     this.scene.time.delayedCall(400 + j * 100, () => {
                         if (tail.active) tail.destroy();
@@ -238,6 +268,7 @@ export default class Boss1Behavior {
     }
 
     enterCooldown() {
+        this._lockFacing = false;
         this.attackState = 'cooldown';
         this.scene.time.delayedCall(this.attackCooldown, () => {
             this.attackState = 'idle';

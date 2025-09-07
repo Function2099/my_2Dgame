@@ -55,20 +55,54 @@ export default class ZoneTriggerManager {
                         this.scene.time.delayedCall(500, () => {
                             this.scene.time.delayedCall(500, () => {
                                 console.log('BOSS 吼叫！');
+                                const boss = this.scene.enemyGroup.getChildren().find(e => e.name === 'Boss1');
+                                if (boss) {
+                                    boss.setTexture('Boss');       // 預設貼圖（或可省略）
+                                    boss.setOrigin(0.5, 1);
+                                    boss.setSize(138, 197);
+                                    boss.setOffset(88, 23);
+                                    boss.setAlpha(0);              // ✅ 一開始透明
+                                    boss.clearTint();              // ✅ 確保沒有黑色遮罩
+
+                                    boss.play('Boss_op');          // ✅ 播放吼叫動畫
+
+                                    this.scene.tweens.add({        // ✅ 淡入效果
+                                        targets: boss,
+                                        alpha: 1,
+                                        duration: 500
+                                    });
+
+                                    boss.once('animationcomplete-Boss_op', () => {
+                                        const anim = boss.anims.currentAnim;
+                                        if (anim && anim.frames.length > 0) {
+                                            const lastFrame = anim.frames[anim.frames.length - 1];
+                                            boss.anims.pause(lastFrame); // 定格最後一幀
+                                        }
+
+                                        this.scene.cameras.main.shake(2000, 0.015); // 鏡頭抖動 2 秒
+
+                                        this.scene.time.delayedCall(2000, () => {
+                                            boss.setTexture('Boss');       // 回到預設貼圖
+                                            boss.setOrigin(0.5, 1);
+                                            boss.setSize(138, 197);
+                                            boss.setOffset(88, 23);
+                                        });
+                                    });
+                                }
+
                                 console.log('播放 BOSS 登場音效(boss_intro)');
 
                                 // ✅ 啟動 Boss 行為
-                                const boss = this.scene.enemyGroup.getChildren().find(e => e.name === 'Boss1');
                                 if (boss) {
                                     boss.injectPlayerController(this.scene.playerController); // ✅ 延遲注入
-                                    this.scene.time.delayedCall(1000, () => {
+                                    this.scene.time.delayedCall(2500, () => {
                                         boss.isActivated = true;
                                         // console.log('Boss 行為已啟動');
                                     });
                                 }
 
                                 // 玩家恢復控制
-                                this.scene.time.delayedCall(500, () => {
+                                this.scene.time.delayedCall(3000, () => {
                                     this.scene.playerController.isLocked = false;
 
                                     console.log('玩家控制器已解除封鎖');

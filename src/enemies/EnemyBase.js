@@ -58,12 +58,12 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
 
         // 等動畫結束後再摧毀
         this.once('animationcomplete', () => {
-            console.log('[die] 關閉 physics');
+            // console.log('[die] 關閉 physics');
             if (config.disablePhysics) {
                 this.body.enable = false;
                 this.attackBox?.body?.enable && (this.attackBox.body.enable = false);
             }
-            console.log('[die] 銷毀角色');
+            // console.log('[die] 銷毀角色');
             this.destroy();
         });
     }

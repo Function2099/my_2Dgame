@@ -164,7 +164,7 @@ export class GameScene extends Phaser.Scene {
         //         console.log(`玩家座標：(${x.toFixed(2)}, ${y.toFixed(2)})`);
         //     }
         // });
-        this.events.on('bossDefeated', () => {
+        this.events.once('bossDefeated', () => {
             console.log('[GameScene] 收到 bossDefeated 事件，2 秒後顯示結算畫面');
             this.time.delayedCall(2000, () => {
                 this.showDemoEndScreen();
@@ -182,7 +182,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     showDemoEndScreen() {
-        this.scene.pause('GameScene');
         this.scene.launch('DemoEndScene');
+        this.isGameActive = false; 
     }
 }
