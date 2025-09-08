@@ -12,7 +12,7 @@ export default class PlatformManager {
     this.platformLayer = platformLayer;
     this.platformLayer.setCollisionBetween(1, 9999);
 
-    // ✅ 延遲執行 tile 檢查，確保資料已準備好
+    //   延遲執行 tile 檢查，確保資料已準備好
     this.scene.time.delayedCall(100, () => {
       let tileCount = 0;
       platformLayer.forEachTile(tile => {

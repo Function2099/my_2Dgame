@@ -37,7 +37,7 @@ export default class Boss1Behavior {
 
         if (this.attackState !== 'idle') return;
         // if (this.attackBox.body.enable) {
-        //     console.log('[Boss1] 攻擊箱啟用中');
+        // console.log('[Boss1] 攻擊箱啟用中');
         // }
 
         const rand = Phaser.Math.Between(0, 1); // 0 或 1

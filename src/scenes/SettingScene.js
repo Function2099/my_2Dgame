@@ -1,8 +1,12 @@
-import { createTitleText, createMainMenuButton } from '../ui/UITextHelper.js';
+import { createTitleText, createSceneButton } from '../ui/UITextHelper.js';
 
 export class SettingsScene extends Phaser.Scene {
   constructor() {
     super('SettingsScene');
+  }
+
+  init() {
+    this.isTransitioning = false;  // ✅ 防止重複切換
   }
 
   create() {
@@ -18,17 +22,9 @@ export class SettingsScene extends Phaser.Scene {
     const title = createTitleText(this, centerX, centerY - 150, '設定');
 
     // 按鈕
-    const keyConfigBtn = createMainMenuButton(this, centerX, centerY, '按鍵設定', () => {
-      this.scene.start('KeyConfigScene');
-    });
-
-    const soundBtn = createMainMenuButton(this, centerX, centerY + buttonSpacing, '聲音設定', () => {
-      console.log('還沒做聲音設定介面');
-    });
-
-    const backBtn = createMainMenuButton(this, centerX, centerY + buttonSpacing * 2, '返回主畫面', () => {
-      this.scene.start('MainMenuScene');
-    });
+    const keyConfigBtn = createSceneButton(this, centerX, centerY, '按鍵設定', 'KeyConfigScene');
+    const soundBtn = createSceneButton(this, centerX, centerY + buttonSpacing, '聲音設定', 'SoundSettingsScene');
+    const backBtn = createSceneButton(this, centerX, centerY + buttonSpacing * 2, '返回主畫面', 'MainMenuScene');
 
     // 淡入動畫
     this.tweens.add({
@@ -37,5 +33,7 @@ export class SettingsScene extends Phaser.Scene {
       duration: 900,
       ease: 'Power2',
     });
+    this.cameras.main.fadeIn(500, 0, 0, 0);
+
   }
 }

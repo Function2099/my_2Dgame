@@ -27,17 +27,32 @@ export class KeyConfigScene extends Phaser.Scene {
         // 這裡先直接用 helper，位置放中間，做微調就好
 
         // 先用共用的 createMainMenuButton（居中），再用 setX 調整位置
-        const backToSettingsBtn = createMainMenuButton(this, centerX, bottomY, '← 返回設定', () => {
+        const backToSettingsBtn = createMainMenuButton(this, centerX, bottomY, '返回設定', () => {
             this.registry.set('keyBindings', this.keyBindingMenu.getBindings());
-            this.scene.start('SettingsScene');
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('SettingsScene');
+            });
         });
-        backToSettingsBtn.setX(centerX - 130);
 
-        const backToMainBtn = createMainMenuButton(this, centerX, bottomY, '返回主選單 →', () => {
+        backToSettingsBtn.setX(centerX - 180);
+
+        const resetBtn = createMainMenuButton(this, centerX, bottomY, '重設', () => {
+            this.keyBindingMenu.resetToDefault(); // 重設為預設綁定
             this.registry.set('keyBindings', this.keyBindingMenu.getBindings());
-            this.scene.start('MainMenuScene');
+            this.scene.restart(); // 重新載入場景以更新顯示
         });
-        backToMainBtn.setX(centerX + 130);
+        resetBtn.setX(centerX);
+
+        const backToMainBtn = createMainMenuButton(this, centerX, bottomY, '返回主選單', () => {
+            this.registry.set('keyBindings', this.keyBindingMenu.getBindings());
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('MainMenuScene');
+            });
+
+        });
+        backToMainBtn.setX(centerX + 180);
 
         // 動畫淡入
         this.tweens.add({
@@ -46,5 +61,8 @@ export class KeyConfigScene extends Phaser.Scene {
             duration: 900,
             ease: 'Power2',
         });
+
+        this.cameras.main.fadeIn(500, 0, 0, 0);
+
     }
 }

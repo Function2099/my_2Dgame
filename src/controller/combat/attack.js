@@ -182,13 +182,13 @@ export default class Attack {
                 // console.log('遮擋判斷結果：', tileBlocked);
                 if (tileBlocked) return;
 
-                // ✅ 檢查是否已命中過
+                //   檢查是否已命中過
                 if (enemy._hitThisAttack) {
                     // console.log('已命中過此敵人，跳過');
                     return;
                 }
 
-                // ✅ 標記為已命中
+                //   標記為已命中
                 enemy._hitThisAttack = true;
                 // console.log('敵人受擊！執行 takeHit()');
 

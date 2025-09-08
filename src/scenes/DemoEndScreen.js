@@ -82,7 +82,7 @@ export default class DemoEndScene extends Phaser.Scene {
         });
 
         backBtnBg.on('pointerdown', () => {
-            console.log('[DemoEndScene] 點擊返回主選單');
+            // console.log('[DemoEndScene] 點擊返回主選單');
             this.scene.stop('GameScene');
             this.scene.start('MainMenuScene');
         });

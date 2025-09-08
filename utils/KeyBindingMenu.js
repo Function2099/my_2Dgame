@@ -145,4 +145,30 @@ export default class KeyBindingMenu {
     getBindings() {
         return this.keyMap;
     }
+
+    resetToDefault() {
+        this.keyMap = {
+            moveLeft: 'LEFT',
+            moveRight: 'RIGHT',
+            Up: 'UP',
+            Down: 'DOWN',
+            jump: 'SPACE',
+            dash: 'X',
+            attack: 'Z',
+        };
+
+        // 更新 UI 顯示
+        Object.keys(this.keyMap).forEach((action) => {
+            if (this.labels[action]) {
+                this.labels[action].setText(this.keyMap[action]);
+                this.labels[action].setStyle({
+                    backgroundColor: '#1a1a1a',
+                    color: '#ffffff',
+                });
+            }
+        });
+
+        // 更新 registry
+        this.scene.registry.set('keyBindings', this.keyMap);
+    }
 }

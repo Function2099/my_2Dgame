@@ -68,8 +68,11 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
-    takeHitEffect(x, y, color = 0xffffff, count = 6) {
+    takeHitEffect(x, y, color = 0xffffff, count = 8) {
         this.setTint(0xffffff);
+        const bounds = this.getBounds();
+        const centerX = bounds.centerX;
+        const centerY = bounds.centerY;
 
         this.scene.tweens.add({
             targets: this,
@@ -84,18 +87,25 @@ export default class EnemyBase extends Phaser.Physics.Arcade.Sprite {
         });
 
         for (let i = 0; i < count; i++) {
-            const px = this.scene.add.rectangle(x, y, 4, 4, color);
+            const size = Phaser.Math.Between(4, 8);
+            const px = this.scene.add.rectangle(centerX, centerY, size, size, color);
             this.scene.physics.add.existing(px);
             px.body.setVelocity(
-                Phaser.Math.Between(-80, 80),
-                Phaser.Math.Between(-120, -40)
+                Phaser.Math.Between(-180, 180),
+                Phaser.Math.Between(-240, -80)
             );
             px.body.allowGravity = false;
             px.body.setImmovable(true);
 
-            this.scene.time.delayedCall(300, () => {
-                if (px.active) px.destroy();
+            this.scene.tweens.add({
+                targets: px,
+                angle: Phaser.Math.Between(-180, 180),
+                scale: { from: 1.2, to: 0 },
+                alpha: { from: 1, to: 0 },
+                duration: 1000,
+                onComplete: () => px.destroy()
             });
+
         }
     }
 

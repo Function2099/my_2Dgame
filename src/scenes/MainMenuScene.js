@@ -1,4 +1,4 @@
-import { createTitleText, createMainMenuButton } from '../ui/UITextHelper.js';
+import { createTitleText, createSceneButton } from '../ui/UITextHelper.js';
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -15,13 +15,8 @@ export class MainMenuScene extends Phaser.Scene {
 
     const title = createTitleText(this, centerX, centerY - 150, '遊戲主選單');
 
-    const startBtn = createMainMenuButton(this, centerX, centerY, '開始遊戲', () => {
-      this.scene.start('GameScene');
-    });
-
-    const settingsBtn = createMainMenuButton(this, centerX, centerY + buttonSpacing, '設定', () => {
-      this.scene.start('SettingsScene');
-    });
+    const startBtn = createSceneButton(this, centerX, centerY, '開始遊戲', 'LoadingScene');
+    const settingsBtn = createSceneButton(this, centerX, centerY + buttonSpacing, '設定', 'SettingsScene');
 
     this.tweens.add({
       targets: [title, startBtn, settingsBtn],
@@ -29,5 +24,6 @@ export class MainMenuScene extends Phaser.Scene {
       duration: 900,
       ease: 'Power2'
     });
+    this.cameras.main.fadeIn(500, 0, 0, 0);
   }
 }

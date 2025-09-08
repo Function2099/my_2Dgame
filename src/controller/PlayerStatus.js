@@ -102,7 +102,7 @@ export default class PlayerStatus {
         });
 
         // console.log('[PlayerStatus] 玩家受傷！來自位置:', fromX);
-        this.player.setTint(0xffffff); // ✅ 閃白
+        this.player.setTint(0xffffff); // 閃白
 
         this.flashDuration = 1200;
         this.flashInterval = 100;  // 每次閃爍時間（來回）
@@ -117,7 +117,7 @@ export default class PlayerStatus {
             this.player.setTint(0x000000);
             this.player.setActive(false);
             this.player.setVisible(false);
-            console.log('玩家死亡');
+            // console.log('玩家死亡');
         }
     }
 

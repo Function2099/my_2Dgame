@@ -69,7 +69,7 @@
     <property name="type" value="flying"/>
    </properties>
   </object>
-  <object id="11" x="5539.39" y="366.667" width="32" height="32">
+  <object id="11" x="5152.72" y="366.667" width="32" height="32">
    <properties>
     <property name="type" value="ground"/>
    </properties>

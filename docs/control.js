@@ -54,7 +54,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
   console.log('startGame 函數:', typeof window.startGame);
 
   setTimeout(() => {
-    console.log('調用 startGame');
+    // console.log('調用 startGame');
     checkLoginBeforeStart();
   }, 500);
 

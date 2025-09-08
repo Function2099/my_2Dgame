@@ -12,8 +12,8 @@ export default class PlayerHealthBar {
         this.y = 20;                   // 上方留 20px 邊距
 
         this.bar = scene.add.graphics();
-        this.bar.setScrollFactor(0); // ✅ 固定在畫面上
-        this.bar.setDepth(10);      // ✅ 保證在 UI 層級之上
+        this.bar.setScrollFactor(0); //   固定在畫面上
+        this.bar.setDepth(10);      //   保證在 UI 層級之上
 
         this.draw();
     }
@@ -35,7 +35,7 @@ export default class PlayerHealthBar {
         const barWidth = this.width * hpRatio;
 
         const rightEdge = this.x + this.width;
-        const barX = rightEdge - barWidth; // ✅ 從右邊開始畫
+        const barX = rightEdge - barWidth; //   從右邊開始畫
 
         this.bar.fillStyle(0xff4444);
         this.bar.fillRect(barX, this.y, barWidth, this.height);

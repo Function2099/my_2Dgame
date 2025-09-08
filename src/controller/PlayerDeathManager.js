@@ -56,7 +56,7 @@ export default class PlayerDeathManager {
 
     respawn() {
         this.player.clearTint();
-        this.player.setPosition(100, 1040); // 起始點或儲存點
+        this.player.setPosition(1768, 126); // 起始點或儲存點
         this.player.setVelocity(0, 0);
         this.scene.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.playerStatus.isDead = false;

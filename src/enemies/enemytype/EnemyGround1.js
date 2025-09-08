@@ -36,8 +36,7 @@ export default class EnemyGround1 extends EnemyBase {
         if (this.isHit || this.state === 'dead') return;
 
         const player = playerStatus.player;
-        const activeNow = this.scene.gameTime.now();
-        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        const now = this.scene.gameTime.now();
         const offsetX = this.flipX ? -70 : 70;
         const touching = this.scene.physics.overlap(this, playerStatus.player);
         this.attackBox.x = this.x + offsetX;
@@ -58,20 +57,20 @@ export default class EnemyGround1 extends EnemyBase {
         this.enforceWorldBounds();
 
         // 攻擊判定
-        if (activeNow - this.lastAttackTime > this.attackCooldown) {
+        if (now - this.lastAttackTime > this.attackCooldown) {
             const hit = this.scene.physics.overlap(this.attackBox, playerStatus.player);
             const isFacingPlayer = this.flipX ? player.x < this.x : player.x > this.x;
 
             if (hit && isFacingPlayer) {
                 this.attack(playerStatus);
-                this.lastAttackTime = activeNow;
+                this.lastAttackTime = now;
             }
         }
 
         // 碰撞判定
-        if (touching && activeNow - this.lastContactTime > this.contactDamageCooldown) {
+        if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
             playerStatus.takeHit(this.x);
-            this.lastContactTime = activeNow;
+            this.lastContactTime = now;
         }
     }
 
@@ -110,7 +109,7 @@ export default class EnemyGround1 extends EnemyBase {
 
     hasGroundAhead() {
         const aheadX = this.x + this.direction * 20;
-        const aheadY = this.y + this.height / 2 + 2; // 更準確地偵測腳下
+        const aheadY = this.body.bottom + 2 // 更準確地偵測腳下
 
         const layer = this.scene.platformManager.getLayer();
         return layer.hasTileAtWorldXY(aheadX, aheadY);
@@ -139,7 +138,7 @@ export default class EnemyGround1 extends EnemyBase {
 
                 if (hit && isFacingPlayer) {
                     // console.log('玩家被敵人攻擊命中');
-                    this.showAttackBox();
+                    // this.showAttackBox();
                     playerStatus.takeHit(this.x);
                 } else {
                     // console.log('攻擊失敗：玩家已脫離範圍');

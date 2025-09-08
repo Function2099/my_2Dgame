@@ -98,9 +98,9 @@ export default class EnemyFlying1 extends EnemyBase {
         }
 
         // 碰撞傷害
-        const activeNow = this.scene.gameTime.now();
+        const now = this.scene.gameTime.now();
         const touching = this.scene.physics.overlap(this, player);
-        if (touching && activeNow - this.lastContactTime > this.contactDamageCooldown) {
+        if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
             this._lastContactTime = now;
 
             this.playerController?.status?.takeHit(this.boss.x, null, 1, {
@@ -280,77 +280,20 @@ export default class EnemyFlying1 extends EnemyBase {
         }
 
         if (this._movementState === 'engage') {
-            const deltaX = player.x - this.x;
-            const dirX = deltaX > 0 ? 1 : -1;
             this.updateFacingDirection(player.x);
-            const deltaY = player.y - this.y;
-            let vy = null;
 
-            if (!this.canSeePlayer(player)) {
-                if (now - this._lostSightTime > 5000) {
-                    this._movementState = 'return';
-                    this._returning = true;
-                    return;
-                }
-            }
+            if (this.shouldReturnToIdle(now, player)) return;
 
-            // 玩家高度接近時強制上升
-            if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) {
-                this._forceRiseUntil = now + 2000;
-                vy = -60;
-            }
+            this.updateYMovement(now, player);
+            this.updateXMovement(now, player);
 
-            // 碰到平台底部時強制上升
-            const layer = this.scene.platformManager.getLayer(); // 拿到 TilemapLayer
-            const checkX = this.x;
-            const checkY = this.y + this.displayHeight / 2 + 2; // 偵測底部稍微偏下
-
-            const isTouchingBottom = layer.hasTileAtWorldXY(checkX, checkY);
-
-            if (isTouchingBottom && now > this._forceRiseUntil) {
-                this._forceRiseUntil = now + 2000;
-                vy = -60;
-            }
-
-            // 如果正在強制上升期間，維持上升速度
-            if (now < this._forceRiseUntil && vy === null) {
-                vy = -60;
-            }
-
-            // 否則使用追蹤邏輯
-            if (vy === null) {
-                vy = Phaser.Math.Clamp(deltaY * 0.3, -60, 60);
-            }
-
-            this.setVelocityY(vy);
-            this.fly();
-
-            if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
-                this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-                this._engageForceUntil = now + 1600; // 鎖定方向 1.5 秒
-            }
-
-            if (now < this._engageForceUntil) {
-                this.setVelocityX(this._engageForceDir * 60);
-            } else if (distance > 100) {
-                this.setVelocityX(dirX * 60);
-            }
-
-            if (distance < this.escapeDistance && now > this._escapeCooldownUntil) {
-                this._movementState = 'escape';
-                this._escapeCooldownUntil = now + this.escapeCooldown;
-                this._lockedDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-                this._lockedDirUntil = now + this.escapeDuration;
+            if (this.shouldEscape(now, player)) {
+                this.enterEscapeState(now);
                 return;
             }
 
             if (this.canSeePlayer(player)) {
-                this._lostSightTime = now; // 玩家仍在偵測範圍
-            }
-
-            if (now - this._lostSightTime > 5000) {
-                this._movementState = 'return';
-                this._returning = true;
+                this._lostSightTime = now;
             }
 
             return;
@@ -406,6 +349,66 @@ export default class EnemyFlying1 extends EnemyBase {
             const angle = Math.atan2(dy, dx);
             this.setVelocity(Math.cos(angle) * 60, Math.sin(angle) * 60);
         }
+    }
+
+    shouldReturnToIdle(now, player) {
+        if (!this.canSeePlayer(player) && now - this._lostSightTime > 5000) {
+            this._movementState = 'return';
+            this._returning = true;
+            return true;
+        }
+        return false;
+    }
+
+    updateYMovement(now, player) {
+        const deltaY = player.y - this.y;
+        let vy = null;
+
+        const forceRise = () => {
+            this._forceRiseUntil = now + 2000;
+            vy = -60;
+        };
+
+        if (Math.abs(deltaY) < 70 && now > this._forceRiseUntil) forceRise();
+
+        const layer = this.scene.platformManager.getLayer();
+        const checkY = this.y + this.displayHeight / 2 + 2;
+        if (layer.hasTileAtWorldXY(this.x, checkY) && now > this._forceRiseUntil) forceRise();
+
+        if (now < this._forceRiseUntil && vy === null) vy = -60;
+
+        if (vy === null) vy = Phaser.Math.Clamp(deltaY * 0.3, -60, 60);
+
+        this.setVelocityY(vy);
+        this.fly();
+    }
+
+    updateXMovement(now, player) {
+        const deltaX = player.x - this.x;
+        const dirX = deltaX > 0 ? 1 : -1;
+
+        if (Math.abs(deltaX) < 30 && now > this._engageForceUntil) {
+            this._engageForceDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+            this._engageForceUntil = now + 1600;
+        }
+
+        if (now < this._engageForceUntil) {
+            this.setVelocityX(this._engageForceDir * 60);
+        } else {
+            this.setVelocityX(dirX * 60);
+        }
+    }
+
+    shouldEscape(now, player) {
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
+        return distance < this.escapeDistance && now > this._escapeCooldownUntil;
+    }
+
+    enterEscapeState(now) {
+        this._movementState = 'escape';
+        this._escapeCooldownUntil = now + this.escapeCooldown;
+        this._lockedDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+        this._lockedDirUntil = now + this.escapeDuration;
     }
 
     canSeePlayer(player) {

@@ -3,7 +3,6 @@ import PauseMenu from "../ui/PauseMenu.js";
 import EnemyManager from "../enemies/EnemyManager.js";
 import PlatformManager from "../platforms/PlatformManager.js";
 import { registerAnimations } from '../animation/AnimationRegistry.js';
-import { loadAssets } from "../animation/AssetLoader.js";
 import CameraManager from "../controller/CameraManager.js";
 import ZoneTriggerManager from "../controller/ZoneTriggerManager.js";
 import PlayerHealthBar from "../ui/PlayerHealthBar.js";
@@ -16,21 +15,6 @@ export class GameScene extends Phaser.Scene {
         this.isGameActive = false;
     }
 
-    // 資源加載
-    preload() {
-        // 美術資源
-        loadAssets(this);
-
-        // 子彈
-        const bulletGfx = this.add.graphics();
-        bulletGfx.fillStyle(0xffffff, 1);
-        bulletGfx.fillCircle(16, 16, 12);
-        bulletGfx.generateTexture('enemyBullet', 32, 32); // ✅ 貼圖大小 32x32
-        bulletGfx.destroy();
-
-    }
-
-    // 測試
     create() {
         console.log('創建遊戲場景...');
         console.log('Phaser version =', Phaser.VERSION);
@@ -55,9 +39,9 @@ export class GameScene extends Phaser.Scene {
         // 區域一
         // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
         // 區域二
-        // this.player = this.physics.add.sprite(3486, 670, 'player_idle');
+        this.player = this.physics.add.sprite(3486, 670, 'player_idle');
         // 區域三
-        this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
+        // this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
         this.player.setCollideWorldBounds(true);
 
@@ -80,7 +64,7 @@ export class GameScene extends Phaser.Scene {
         this.platformManager = new PlatformManager(this);
         const map = this.make.tilemap({ key: 'map_intro' });
         const deathZones = map.getObjectLayer('deathZones')?.objects;
-        console.log('讀取到死亡區域：', deathZones);
+        // console.log('讀取到死亡區域：', deathZones);
         this.deathZones = deathZones || [];
 
         // 背景圖片
@@ -165,7 +149,7 @@ export class GameScene extends Phaser.Scene {
         //     }
         // });
         this.events.once('bossDefeated', () => {
-            console.log('[GameScene] 收到 bossDefeated 事件，2 秒後顯示結算畫面');
+            // console.log('[GameScene] 收到 bossDefeated 事件，2 秒後顯示結算畫面');
             this.time.delayedCall(2000, () => {
                 this.showDemoEndScreen();
             });
@@ -183,6 +167,6 @@ export class GameScene extends Phaser.Scene {
 
     showDemoEndScreen() {
         this.scene.launch('DemoEndScene');
-        this.isGameActive = false; 
+        this.isGameActive = false;
     }
 }

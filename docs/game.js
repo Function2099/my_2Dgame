@@ -4,6 +4,8 @@ import { MainMenuScene } from '../src/scenes/MainMenuScene.js';
 import { GameScene } from '../src/scenes/GameScene.js';
 import { KeyConfigScene } from '../src/scenes/SettingScene/KeyConfigScene.js';
 import DemoEndScene from '../src/scenes/DemoEndScreen.js';
+import { LoadingScene } from '../src/scenes/LoadingScene.js';
+import { SoundSettingsScene } from '../src/scenes/SettingScene/SoundSettingScene.js';
 // 遊戲變數
 let game = null;
 
@@ -22,14 +24,19 @@ const gameConfig = {
         default: 'arcade',
         arcade: {
             gravity: { y: 800 },
-            debug: true
+            // debug: true
         }
+    },
+    dom: {
+        createContainer: true
     },
     scene: [
         MainMenuScene,
+        LoadingScene,
         SettingsScene,
         GameScene,
         KeyConfigScene,
+        SoundSettingsScene,
         DemoEndScene
     ]
 };
@@ -61,7 +68,7 @@ function startGame() {
 function destroyGame() {
     if (game) {
         try {
-            game.destroy(true); // ✅ 銷毀並清除 canvas
+            game.destroy(true); // 銷毀並清除 canvas
             console.log('遊戲已銷毀');
         } catch (error) {
             console.warn('銷毀遊戲時發生錯誤:', error);

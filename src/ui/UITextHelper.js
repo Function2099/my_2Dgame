@@ -30,7 +30,7 @@ export function createMainMenuButton(scene, x, y, text, callback) {
         fontSize: '28px',
         color: '#ffffffff',
         backgroundColor: '#12151a',
-        padding: { left: 30, right: 30, top: 12, bottom: 12 },
+        padding: { left: 15, right: 15, top: 6, bottom: 6 },
         stroke: '#585858ff',
         strokeThickness: 3,
         shadow: {
@@ -79,5 +79,17 @@ export function createMainMenuButton(scene, x, y, text, callback) {
 
     btn.on('pointerdown', callback);
 
+    return btn;
+}
+
+
+// 切換場景淡入淡出
+export function createSceneButton(scene, x, y, text, targetScene) {
+    const btn = createMainMenuButton(scene, x, y, text, () => {
+        scene.cameras.main.fadeOut(500, 0, 0, 0);
+        scene.cameras.main.once('camerafadeoutcomplete', () => {
+            scene.scene.start(targetScene);
+        });
+    });
     return btn;
 }
