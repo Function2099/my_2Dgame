@@ -85,7 +85,7 @@ main, #game-section {
 }
 
 #game-frame {
-  scroll-margin-top: 0px;
+  scroll-margin-top: 50px;
   width: 100vw;
   max-width: 800px;
   height: auto;
