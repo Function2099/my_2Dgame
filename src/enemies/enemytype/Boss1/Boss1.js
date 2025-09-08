@@ -77,8 +77,12 @@ export default class Boss1 extends EnemyBase {
         // console.log('[Boss1] 進入死亡狀態');
 
         if (this.playerRef?.body) {
-            this.playerRef.body.enable = false;
-            this.playerRef.setVelocity(0);
+            this.playerRef.body.enable = true;
+            this.playerRef.body.setVelocityX(0);
+            this.playerRef.setVelocity(0, 0);
+            this.playerRef.body.setAllowGravity(true);
+            this.playerRef.body.setImmovable(false);
+            this.playerRef.body.setDragX(9999);
         }
 
         if (this.playerController) {

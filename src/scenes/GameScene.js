@@ -37,9 +37,9 @@ export class GameScene extends Phaser.Scene {
 
         // 玩家生成位置
         // 區域一
-        // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
+        this.player = this.physics.add.sprite(100, 1040, 'player_idle');
         // 區域二
-        this.player = this.physics.add.sprite(3486, 670, 'player_idle');
+        // this.player = this.physics.add.sprite(3486, 670, 'player_idle');
         // 區域三
         // this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
@@ -68,15 +68,17 @@ export class GameScene extends Phaser.Scene {
         this.deathZones = deathZones || [];
 
         // 背景圖片
-        const bgImageLayer = map.images.find(img => img.name === 'bg_intro');
-        if (bgImageLayer) {
-            this.add.image(bgImageLayer.x, bgImageLayer.y, 'bg_intro')
+        const bgImageLayers = map.images.filter(img =>
+            ['bg_intro', 'bg_combat', 'bg_bossroom'].includes(img.name)
+        );
+
+        bgImageLayers.forEach(img => {
+            console.log('map.images =', map.images);
+            this.add.image(img.x, img.y, img.name)
                 .setOrigin(0)
-                .setScrollFactor(0)
-                .setDepth(-10);     // 放在最底層
-        } else {
-            console.warn('找不到圖片"');
-        }
+                .setScrollFactor(1)
+                .setDepth(-10);
+        });
 
         // 生成敵人（使用 sprite）
         this.enemyManager = new EnemyManager(this);

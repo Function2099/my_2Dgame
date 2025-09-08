@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="194" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="16">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="194" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="16">
  <editorsettings>
   <export target="map.tmj" format="json"/>
  </editorsettings>
@@ -8,6 +8,12 @@
  </tileset>
  <imagelayer id="4" name="bg_intro">
   <image source="bg_intro.png" width="6200" height="1600"/>
+ </imagelayer>
+ <imagelayer id="12" name="bg_combat" offsetx="3608" offsety="4">
+  <image source="bg_combat.png" width="4000" height="1600"/>
+ </imagelayer>
+ <imagelayer id="11" name="bg_bossroom" offsetx="5434" offsety="974">
+  <image source="baji.png" width="750" height="600"/>
  </imagelayer>
  <layer id="1" name="platforms" width="194" height="50">
   <data encoding="csv">

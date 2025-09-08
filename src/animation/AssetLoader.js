@@ -4,6 +4,8 @@ export function loadAssets(scene) {
     // 平台
     scene.load.tilemapTiledJSON('map_intro', '../assets/platform/map.tmj');
     scene.load.image('bg_intro', '../assets/platform/bg_intro.png');
+    scene.load.image('bg_combat', '../assets/platform/bg_combat.png');
+    scene.load.image('bg_bossroom', '../assets/platform/bg_bossroom.png');
     scene.load.image('platform_tiles', '../assets/platform/tileset.png');
 
     // 特效
