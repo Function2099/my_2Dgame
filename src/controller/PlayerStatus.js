@@ -72,13 +72,13 @@ export default class PlayerStatus {
         const now = this.scene.gameTime.now();
 
         // 血量變動
-        // if (typeof this.hp === 'number') {
-        //     this.hp -= damage;
-        // }
+        if (typeof this.hp === 'number') {
+            this.hp -= damage;
+        }
 
-        // if (this.scene.playerHealthBar) {
-        //     this.scene.playerHealthBar.setHP(this.hp);
-        // }
+        if (this.scene.playerHealthBar) {
+            this.scene.playerHealthBar.setHP(this.hp);
+        }
 
         this.isInvincible = true;
         this.isKnockbacking = true;
