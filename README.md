@@ -35,7 +35,7 @@ my_2DGame
 │   │   └── enemytype
 │   ├── platforms
 │   ├── scenes
-│   │   ├── SettingScene
+│   │   └── SettingScene
 │   └── ui
 └── utils                 # 遊戲工具模組
 
