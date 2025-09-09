@@ -20,24 +20,24 @@ my_2DGame
 ├── CHANGELOG.md
 ├── README.md
 ├── VERSION
-├── assets                # 美術素材
+├── assets/                # 美術素材
 │   ├── enemies/
 │   ├── fx_explosion/
 │   ├── platform/
 │   ├── player/
 │   └── ui_buttons
-├── docs                  # 測試頁與樣式檔案
-├── src                   # 遊戲主程式碼
-│   ├── animation
-│   ├── controller
-│   │   └── combat
-│   ├── enemies
-│   │   └── enemytype
-│   ├── platforms
-│   ├── scenes
-│   │   └── SettingScene
-│   └── ui
-└── utils                 # 遊戲工具模組
+├── docs/                  # 測試頁與樣式檔案
+├── src/                   # 遊戲主程式碼
+│   ├── animation/
+│   ├── controller/
+│   │   └── combat/
+│   ├── enemies/
+│   │   └── enemytype/
+│   ├── platforms/
+│   ├── scenes/
+│   │   └── SettingScene/
+│   └── ui/
+└── utils/                 # 遊戲工具模組
 
 ```
 
