@@ -9,6 +9,7 @@ export default class EnemyFlying1 extends EnemyBase {
         this.setDisplaySize(135, 88);
         this.setOffset(0, 14);
         this.setVelocity(0, 0);
+        this.scene.physics.add.existing(this);
         this.body.allowGravity = false;
         this.originalY = y;
         this._origin = { x, y };
@@ -103,12 +104,11 @@ export default class EnemyFlying1 extends EnemyBase {
         if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
             this._lastContactTime = now;
 
-            this.playerController?.status?.takeHit(this.boss.x, null, 1, {
-                knockbackX: 460,
+            playerStatus.takeHit(this.x, null, 1, {
+                knockbackX: 400,
                 knockbackY: -250,
                 knockbackDuration: 550
             });
-
         }
 
         this.tryShoot(playerStatus);
@@ -409,26 +409,6 @@ export default class EnemyFlying1 extends EnemyBase {
         this._escapeCooldownUntil = now + this.escapeCooldown;
         this._lockedDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         this._lockedDirUntil = now + this.escapeDuration;
-    }
-
-    canSeePlayer(player) {
-        const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
-        if (distance > this.detectionRange) return false;
-
-        const layer = this.scene.platformManager.getLayer();
-        const steps = 4;
-        // const rayMidX = player.x;
-
-        for (let i = 1; i < steps; i++) {
-            const t = i / steps;
-            const checkX = Phaser.Math.Interpolation.Linear([this.x, player.x], t);
-            const checkY = Phaser.Math.Interpolation.Linear([this.y, player.y], t);
-            const tile = layer.getTileAtWorldXY(checkX, checkY);
-            const isBlocked = tile && !tile.properties?.thin;
-            if (isBlocked) return false;
-        }
-
-        return true;
     }
 
     updateFacingDirection(targetX) {

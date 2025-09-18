@@ -69,7 +69,11 @@ export default class EnemyGround1 extends EnemyBase {
 
         // 碰撞判定
         if (touching && now - this.lastContactTime > this.contactDamageCooldown) {
-            playerStatus.takeHit(this.x);
+            playerStatus.takeHit(this.x, null, 1, {
+                knockbackX: 300,
+                knockbackY: -250,
+                knockbackDuration: 350
+            });
             this.lastContactTime = now;
         }
     }

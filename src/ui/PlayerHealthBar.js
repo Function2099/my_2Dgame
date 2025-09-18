@@ -1,19 +1,20 @@
 export default class PlayerHealthBar {
-    constructor(scene, width = 150, height = 16, maxHP = 15) {
+    constructor(scene, width = 150, height = 16, playerStatus) {
         this.scene = scene;
         this.width = width;
         this.height = height;
-        this.maxHP = maxHP;
-        this.currentHP = maxHP;
+        this.playerStatus = playerStatus;
+
+        this.maxHP = playerStatus.maxHp;
+        this.currentHP = playerStatus.hp;
 
         const screenW = scene.scale.width;
-
-        this.x = screenW - width - 60; // 右邊留 20px 邊距
-        this.y = 20;                   // 上方留 20px 邊距
+        this.x = screenW - width - 60;
+        this.y = 20;
 
         this.bar = scene.add.graphics();
-        this.bar.setScrollFactor(0); //   固定在畫面上
-        this.bar.setDepth(10);      //   保證在 UI 層級之上
+        this.bar.setScrollFactor(0);
+        this.bar.setDepth(10);
 
         this.draw();
     }
@@ -21,6 +22,22 @@ export default class PlayerHealthBar {
     setHP(value) {
         this.currentHP = Phaser.Math.Clamp(value, 0, this.maxHP);
         this.draw();
+    }
+
+    setMaxHP(newMax) {
+        this.maxHP = newMax;
+        this.currentHP = Phaser.Math.Clamp(this.currentHP, 0, newMax);
+        this.draw();
+    }
+
+    flash() {
+        this.scene.tweens.add({
+            targets: this.bar,
+            alpha: { from: 1, to: 0.3 },
+            duration: 100,
+            yoyo: true,
+            repeat: 2
+        });
     }
 
     draw() {
@@ -35,7 +52,7 @@ export default class PlayerHealthBar {
         const barWidth = this.width * hpRatio;
 
         const rightEdge = this.x + this.width;
-        const barX = rightEdge - barWidth; //   從右邊開始畫
+        const barX = rightEdge - barWidth;
 
         this.bar.fillStyle(0xff4444);
         this.bar.fillRect(barX, this.y, barWidth, this.height);

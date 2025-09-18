@@ -8,6 +8,7 @@ import ZoneTriggerManager from "../controller/ZoneTriggerManager.js";
 import PlayerHealthBar from "../ui/PlayerHealthBar.js";
 import GameTime from "../../utils/GameTime.js";
 import EffectManager from "../controller/combat/EffectManager.js";
+import SavePointManager from "../controller/SavePointManager.js";
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -35,11 +36,20 @@ export class GameScene extends Phaser.Scene {
             this.effectManager = new EffectManager(this);
         }
 
+        this.particleSystem = this.add.particles(0, 0, 'spark_white', {
+            lifespan: 600,
+            speed: { min: -120, max: 120 },
+            angle: { min: 0, max: 360 },
+            quantity: 25,
+            scale: { start: 1, end: 0 },
+            blendMode: 'ADD',
+            emitting: false // 預設不啟用
+        });
         // 玩家生成位置
         // 區域一
-        this.player = this.physics.add.sprite(100, 1040, 'player_idle');
+        // this.player = this.physics.add.sprite(100, 1040, 'player_idle');
         // 區域二
-        // this.player = this.physics.add.sprite(3486, 670, 'player_idle');
+        this.player = this.physics.add.sprite(3486, 670, 'player_idle');
         // 區域三
         // this.player = this.physics.add.sprite(5400, 1502, 'player_idle');
         this.player.play('player_idle');
@@ -128,6 +138,9 @@ export class GameScene extends Phaser.Scene {
         // 玩家控制
         this.playerController = new PlayerController(this, this.player, this.inputs, this.enemyGroup, this.platformManager);
 
+        // 存檔點（復活點）
+        this.savePointManager = new SavePointManager(this, this.player, map);
+
         // 攝影機
         this.cameraManager = new CameraManager(this, this.player);
         this.cameraManager.stopFollow();
@@ -139,7 +152,7 @@ export class GameScene extends Phaser.Scene {
         this.gameTime = new GameTime(this);
 
         // 血量條
-        this.playerHealthBar = new PlayerHealthBar(this, 150, 16, 15);
+        this.playerHealthBar = new PlayerHealthBar(this, 150, 16, this.playerController.status);
         console.log('場景創建完成');
         console.log('動畫是否存在：', this.anims.exists('player_idle'));
         // this.time.addEvent({
@@ -165,6 +178,9 @@ export class GameScene extends Phaser.Scene {
         this.playerController.update();
         this.enemyManager.update(this.playerController.status);
         this.zoneTriggerManager.update();
+        if (this.savePointManager) {
+            this.savePointManager.hasSavedThisFrame = false;
+        }
     }
 
     showDemoEndScreen() {

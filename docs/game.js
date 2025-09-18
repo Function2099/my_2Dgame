@@ -81,6 +81,6 @@ window.startGame = startGame;
 window.destroyGame = destroyGame;
 
 // 用在test_game.html用的，使用正式的網站(index.html)時記得註解掉這段
-// window.addEventListener('DOMContentLoaded', () => {
-//     startGame();
-// });
+window.addEventListener('DOMContentLoaded', () => {
+    startGame();
+});

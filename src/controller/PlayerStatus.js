@@ -14,7 +14,8 @@ export default class PlayerStatus {
         this.wallJumpLockDirection = null;
         this.isKnockbacking = false;
         this.invincibleEndTime = 0;
-        this.hp = 15;
+        this.maxHp = 5;
+        this.hp = this.maxHp;
     }
     update() {
         const body = this.player.body;
@@ -78,6 +79,7 @@ export default class PlayerStatus {
 
         if (this.scene.playerHealthBar) {
             this.scene.playerHealthBar.setHP(this.hp);
+            this.scene.playerHealthBar.flash();
         }
 
         this.isInvincible = true;
@@ -118,6 +120,7 @@ export default class PlayerStatus {
             this.player.setActive(false);
             this.player.setVisible(false);
             // console.log('玩家死亡');
+            this.scene.playerController.deathManager.triggerDeath();
         }
     }
 
